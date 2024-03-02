@@ -8,6 +8,9 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server);
 
+const port = process.env.PORT || 3001;
+
+
 app.use(logger('dev'));
 app.set('view engine', 'ejs'); 
 app.set('views', __dirname + '/templates'); 
@@ -74,6 +77,6 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log('Server ready on port 3000.');
+server.listen(port, () => {
+  console.log(`Server ready on port {port}`);
 });
