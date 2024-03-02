@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <input id="roomName" type="text" placeholder="Enter Room Name" />
+    <button onclick="join()">Join Room</button>
+  </body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/static/socket.js"></script>
+  <script>
+    function join() {
+      const roomName = document.getElementById("roomName").value;
+    }
+  </script>
+</html>
