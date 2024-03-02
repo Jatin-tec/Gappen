@@ -4,7 +4,7 @@ socket.emit('join', roomName)
 socket.on('created', handleRoomCreated)
 socket.on('joined', handleRoomJoined)
 socket.on('ready', initiateCall)
-// socket.on('leave', handleLeave)
+socket.on('leave', handleLeave)
 socket.on('full', () => {
     console.log('Room is full');
 });

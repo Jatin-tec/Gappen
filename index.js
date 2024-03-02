@@ -78,5 +78,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(port, () => {
-  console.log(`Server ready on port {port}`);
+  console.log(`Server ready on port ${port}`);
 });

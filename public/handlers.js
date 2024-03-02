@@ -15,7 +15,7 @@ const servers = {
 const handleRoomCreated = async (roomName) => {
     console.log('Room created');
     localStream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
+        audio: true,
         video: true,
     })
     document.getElementById('user-1').srcObject = localStream;
@@ -24,7 +24,7 @@ const handleRoomCreated = async (roomName) => {
 const handleRoomJoined = async (roomName) => {
     console.log('Room joined');
     localStream = await navigator.mediaDevices.getUserMedia({
-            audio: false,
+            audio: true,
             video: true,
     })
     document.getElementById('user-1').srcObject = localStream;
@@ -102,4 +102,11 @@ const handleNewICECandidateMsg = (candidate) => {
 
 const handleTrackEvent = (event) => {
     remoteStream = event.streams[0];
+}
+
+const handleLeave = () => {
+    document.getElementById('user-2').srcObject.getTracks().forEach(track => track.stop());
+    document.getElementById('user-2').srcObject = null;
+    peerConnection.close();
+    peerConnection = null;
 }
