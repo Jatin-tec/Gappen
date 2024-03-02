@@ -7,13 +7,38 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1><%= room_id %></h1>
-   <div id="videos">
-    <video class="video-player" id="user-1" autoplay playsinline></video>
-    <video class="video-player" id="user-2" autoplay playsinline></video>
-   </div> 
+    <div class="container">
+        <div class="inside">
+            <div class="user2">
+                <div class="videouser2">
+                    <div class="user1">
+                        <video class="" id="user-1" autoplay playsinline></video>
+                    </div> 
+                    <video class="video-player" id="user-2" autoplay playsinline></video>
+                </div>
+                
+               
+            </div>
+            <div class="chat">
+                <button class="next">Skip</button>
+            </div>
+        </div>
+          
+    </div>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/static/handlers.js"></script>
 <script src="/static/main.js"></script>
 </html>
+
+<!-- 
+<div class="navbar">
+    <h1 class="nav-content"><%= room_id %></h1>
+</div>
+<div id="videos">
+<div class="user1content">
+<video class="video-player" id="user-1" autoplay playsinline></video>
+</div>
+<div class="user2video">    
+</div>
+</div>  -->

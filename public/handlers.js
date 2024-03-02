@@ -15,7 +15,7 @@ const servers = {
 const handleRoomCreated = async (roomName) => {
     console.log('Room created');
     localStream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+        audio: false,
         video: true,
     })
     document.getElementById('user-1').srcObject = localStream;
@@ -24,7 +24,7 @@ const handleRoomCreated = async (roomName) => {
 const handleRoomJoined = async (roomName) => {
     console.log('Room joined');
     localStream = await navigator.mediaDevices.getUserMedia({
-            audio: true,
+            audio: false,
             video: true,
     })
     document.getElementById('user-1').srcObject = localStream;
