@@ -7,10 +7,23 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-   <div id="videos">
-    <video class="video-player" id="user-1" autoplay playsinline></video>
-    <video class="video-player" id="user-2" autoplay playsinline></video>
-   </div> 
+    <div class="container">
+        <div class="inside">
+            <div class="user2">
+                <div class="videouser2">
+                    <div class="user1">
+                        <video class="" id="user-1" autoplay playsinline></video>
+                    </div> 
+                    <video class="video-player" id="user-2" autoplay playsinline></video>
+                </div>
+                
+               
+            </div>
+            <div class="chat">
+                <button class="next" id="skipButton">Skip</button>
+            </div>
+        </div>    
+    </div>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/static/handlers.js"></script>

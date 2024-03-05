@@ -1,12 +1,6 @@
-const roomName = window.location.pathname.split('/')[2];
-
-socket.on('joined', handleRoomJoined)
-socket.on('ready', initiateCall)
-socket.on('leave', handleLeave)
-socket.on('full', () => {
-    console.log('Room is full');
-});
-
-socket.on('offer', handleOffer)
-socket.on('answer', handleAnswer)
-socket.on('ice-candidate', handleNewICECandidateMsg)
+socket.on('roomJoined', handleRoomJoined)
+socket.on('offer', (offer, roomId) => handleOffer(offer, roomId))
+socket.on('answer', (answer, roomId) => handleAnswer(answer, roomId))
+socket.on('ice-candidate', (candidate, roomId) => handleCandidate(candidate, roomId))
+socket.on('userSkipped', () => handleSkip())
+socket.on('leave', () => handleLeave())

@@ -1,11 +1,132 @@
-#videos {
+/* #videos {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 2em;
-}
-
+}*/
+/* 
 .video-player {
     background-color: black;
     width: 100%;
     height: 300px;
+} 
+#user-1{
+    
+    border-radius: 15px;
+    max-width: 400px;
+    max-height: 400px;
+    width: fit-content;
+    height: fit-content;
+    border: white solid 2px;
+} */
+/* .user1content{
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+} */
+/* .next{
+    font-size: small;
+    
+}
+#user-2{
+    border: white solid 2px;
+    align-self: center;
+    height: 70vh;
+    width: 80vh;
+    border-radius: 15px;
+    width: fit-content;
+    height: fit-content;
+} */
+/* .container{
+    height: 100vh;
+    width: 100vw;
+    background-color: #201f1f;
+    
+}
+body{
+    background-color: #201f1f;
+}
+.navbar{
+    display: flex;
+    justify-content: center;
+    border-radius: 15px;
+    margin: 16px;
+    background-color: #808080;
+} */
+.nav-content{
+    /* padding: 16px; */
+}
+/* .chatting{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: #b62828;
+} */
+.inside{
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 98vh;
+    background-color: #000000;
+}   
+.user2{
+    border-radius: 15px;
+    flex: 2;
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 16px;
+    background-color: #EDEADE;
+}
+.videouser2 {
+    border-radius: 15px;
+    height: 80%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    aspect-ratio: 13 / 9;
+    background-color:rgb(255, 255, 255);
+}
+#user-2{
+    border-radius: 15px;
+    height: 100%;
+    width: 100%;
+}
+.chat{
+    margin: 16px;
+    border-radius: 15px;
+    flex: 1;
+    height: 80vh;
+    /* width: 00px; */
+    background-color: #ddc8c8;
+}
+.user1 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding-top: 5px;
+    /* height: 200px; */
+    aspect-ratio: 13 / 9;
+    background-color: rgb(255, 255, 255);
+    border-radius: 15px;
+}
+#user-1{
+    position: relative;
+    height: 100%;
+    width: 300px;
+}
+.video-player{
+    border-radius: 15px;
+    height: 100%;
+    width: 100%;
+}
+.next{
+    width: 100px;
+    height: 40px;
+    background-color: red;
+    margin: 16px;
+    border-radius: 16px;
+    padding: 5px;
 }
