@@ -6,14 +6,15 @@
     <title>Document</title>
   </head>
   <body>
-    <input id="roomName" type="text" placeholder="Enter Room Name" />
-    <button onclick="join()">Join Room</button>
+    <center>
+      <input id="userName" type="text" placeholder="choose a username" />
+      <button onclick="join()">Join Room</button>
+    </center>
   </body>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/static/socket.js"></script>
   <script>
     function join() {
-      const roomName = document.getElementById("roomName").value;
+      const userName = document.getElementById("userName").value;
+      window.location = `/room?userName=${encodeURIComponent(userName)}`;
     }
   </script>
 </html>

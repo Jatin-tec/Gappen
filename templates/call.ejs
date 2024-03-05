@@ -1,31 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
     <div class="container">
-        <div class="inside">
-            <div class="user2">
-                <div class="videouser2">
-                    <div class="user1">
-                        <video class="" id="user-1" autoplay playsinline></video>
-                    </div> 
-                    <video class="video-player" id="user-2" autoplay playsinline></video>
-                </div>
-                
-               
+      <div class="inside">
+        <div class="user2">
+          <div class="videouser2">
+            <div class="user1">
+              <h1 id="username" data-username="<%= userName %>"><%= userName %></h1>
+              <video class="" id="user-1" autoplay playsinline></video>
             </div>
-            <div class="chat">
-                <button class="next" id="skipButton">Skip</button>
-            </div>
-        </div>    
+            <video
+              class="video-player"
+              id="user-2"
+              autoplay
+              playsinline
+            ></video>
+          </div>
+        </div>
+        <div class="chat">
+          <button class="next" id="skipButton">Skip</button>
+        </div>
+      </div>
     </div>
-</body>
-<script src="/socket.io/socket.io.js"></script>
-<script src="/static/handlers.js"></script>
-<script src="/static/main.js"></script>
+  </body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/static/handlers.js"></script>
+  <script src="/static/main.js"></script>
 </html>

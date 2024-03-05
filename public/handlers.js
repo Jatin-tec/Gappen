@@ -1,28 +1,3 @@
-const socket = io();
-const servers = {
-    iceServers: [
-        {
-            urls: [
-                'stun:stun1.l.google.com:19302',
-                'stun:stun2.l.google.com:19302',
-            ]
-        }
-    ]
-};
-
-let localStream;
-let remoteStream;
-let peerConnection;
-
-async function joinChat() {
-    localStream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: true,
-    });
-    document.getElementById('user-1').srcObject = localStream;
-    socket.emit('join');
-};
-
 const handleRoomJoined = async (roomId) => {
     console.log(`Joined room: ${roomId}`);
     if (!peerConnection) {
@@ -88,7 +63,5 @@ function resetVideoCall() {
     }
     // Optionally, clear the remote video display or show a message
     document.getElementById('user-2').srcObject = null;
-    joinChat(); // Rejoin the chat to be matched with another user
+    socket.emit('join');
 }
-
-joinChat();
