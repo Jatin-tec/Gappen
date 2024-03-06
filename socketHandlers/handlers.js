@@ -1,26 +1,8 @@
-const redis = require('redis')
-
-const client = redis.createClient({
-    url: 'redis://localhost:6379' // URL to your Redis instance
-});
-
-client.connect();
-
-client.on('connect', function () {
-    console.log('Connected to Redis');
-});
-
-client.on('error', function (err) {
-    console.log('Redis error: ' + err);
-});
-
-const userRoomMap = new Map();
-
-function registerSocketEvents(io, socket) {
+function registerSocketEvents(io, socket, client) {
     socket.on("join", (userName) => {
         const queueName = Math.random() < 0.5 ? 'waitingUsersA' : 'waitingUsersB';
-        addUserToWaitingList(socket, queueName, userName);
-        attemptToMatchUsers(io, queueName, userName);
+        addUserToWaitingList(socket, queueName, userName, client);
+        attemptToMatchUsers(io, queueName, client);
     });
 
     socket.on("ready", (roomName) => {
@@ -58,13 +40,13 @@ function registerSocketEvents(io, socket) {
                 await client.del(`room:${otherSocketId}`);
 
                 // Re-add users to the waiting lists for a new match
-                await addUserToWaitingList(socket, 'waitingUsersA');
-                await addUserToWaitingList(otherSocket, 'waitingUsersB');
+                await addUserToWaitingList(socket, 'waitingUsersA', client);
+                await addUserToWaitingList(otherSocket, 'waitingUsersB', client);
 
                 // Attempt to match both users in their respective new queues
-                attemptToMatchUsers(io, 'waitingUsersB');
+                attemptToMatchUsers(io, 'waitingUsersB', client);
             }
-            attemptToMatchUsers(io, 'waitingUsersA');
+            attemptToMatchUsers(io, 'waitingUsersA', client);
         }
     });
 
@@ -85,11 +67,12 @@ function registerSocketEvents(io, socket) {
                 io.to(otherSocket.id).emit("partnerDisconnected");
                 // Optionally, move the remaining user to a waiting list for re-matching
                 const newQueue = wasInQueueA ? 'waitingUsersB' : 'waitingUsersA'; // Switch queue if the user was in one
-                await addUserToWaitingList(otherSocket, newQueue);
-                attemptToMatchUsers(io, newQueue);
+                await addUserToWaitingList(otherSocket, newQueue, client);
+                attemptToMatchUsers(io, newQueue, client);
             }
             // Clean up room mappings
             await client.del(`room:${socket.id}`);
+            await client.del(`username:${socket.id}`);
             if (otherSocketId) {
                 await client.del(`room:${otherSocketId}`);
             }
@@ -98,21 +81,25 @@ function registerSocketEvents(io, socket) {
         // Attempt to match users in the remaining queue
         const queueToMatch = wasInQueueA > 0 ? 'waitingUsersA' : 'waitingUsersB';
         if (wasInQueueA > 0 || wasInQueueB > 0) {
-            attemptToMatchUsers(io, queueToMatch);
+            attemptToMatchUsers(io, queueToMatch, client);
         }
     });
 }
 
-async function addUserToWaitingList(socket, queueName, userName) {
+async function addUserToWaitingList(socket, queueName, userName, client) {
     await client.sAdd(queueName, socket.id);
+    await client.set(`user:${socket.id}`, userName);
     const waitingUsers = await client.sCard(queueName);
     console.log(`User ${socket.id} added to waiting list ${queueName}. Waiting users: ${waitingUsers}`);
 }
 
-async function attemptToMatchUsers(io, queueName, userName) {
+async function attemptToMatchUsers(io, queueName, client) {
     while (await client.sCard(queueName) >= 2) {
         const user1Id = await client.sPop(queueName);
         const user2Id = await client.sPop(queueName);
+
+        const user1Name = await client.get(`user:${user1Id}`);
+        const user2Name = await client.get(`user:${user2Id}`);
 
         const roomName = `room-${user1Id}-${user2Id}`;
         await client.set(`room:${user1Id}`, roomName);
@@ -125,7 +112,17 @@ async function attemptToMatchUsers(io, queueName, userName) {
             user1Socket.join(roomName);
             user2Socket.join(roomName);
 
-            io.to(roomName).emit("roomJoined", roomName);
+
+            io.to(roomName).emit("roomJoined", roomName, {
+                user1: {
+                    id: user1Id,
+                    name: user1Name
+                }, user2: {
+                    id: user2Id,
+                    name: user2Name
+
+                }
+            });
             console.log(`Users ${user1Id} and ${user2Id} joined room ${roomName}`);
         }
     }

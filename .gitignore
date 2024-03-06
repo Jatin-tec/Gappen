@@ -12,3 +12,6 @@ pids
 # node modules
 /node_modules
 .vercel
+
+# environment file
+.env

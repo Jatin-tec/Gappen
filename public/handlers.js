@@ -1,5 +1,6 @@
-const handleRoomJoined = async (roomId) => {
+const handleRoomJoined = async (roomId, users) => {
     console.log(`Joined room: ${roomId}`);
+    document.getElementById('username2').innerText = users['user2'].name;
     if (!peerConnection) {
         createPeerConnection(roomId);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
