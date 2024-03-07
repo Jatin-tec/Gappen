@@ -52,9 +52,9 @@ body{
     margin: 16px;
     background-color: #808080;
 } */
-.nav-content{
+/* .nav-content{ */
     /* padding: 16px; */
-}
+/* } */
 /* .chatting{
     display: flex;
     justify-content: center;
@@ -108,10 +108,11 @@ body{
     left: 0;
     padding-top: 5px;
     /* height: 200px; */
-    aspect-ratio: 13 / 9;
+    aspect-ratio:auto;
     background-color: rgb(255, 255, 255);
     border-radius: 15px;
 }
+
 #user-1{
     position: relative;
     height: 100%;
@@ -129,4 +130,80 @@ body{
     margin: 16px;
     border-radius: 16px;
     padding: 5px;
+}
+.card{
+    overflow: auto;
+    background-color: #eee9e9;
+    border-radius: 5px;
+    width: 80%;
+    height: 60vh;
+    margin: 20px;
+    opacity: 90%;
+}
+.user1chat{
+    /* display: flex; */
+    /* justify-content: left; */
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #ce5151;
+    margin: 5px;
+}
+.user2chat{
+    /* display: flex; */
+    /* justify-content: right; */
+    padding: 5px;
+    border-radius: 5px;
+    /* margin: 16px; */
+    background-color: #ce5151;
+    margin: 5px;
+}
+.input-card{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* position: sticky; */
+    /* height: 10%; */
+    /* width: 85%; */
+    /* margin-left: 5px; */
+}
+.input-card button{
+    margin: 16px;
+    border-radius: 15px;
+    padding: 5px;
+    background-color: #ce5151;
+}
+.input-card .message{
+    border-radius: 5px;
+    padding: 5px;
+    margin: 16px;
+    /* width: 80%; */
+}
+.chat-input{
+    overflow: auto;
+    background-color: #eee9e9;
+    border-radius: 5px;
+    /* height: 80%; */
+    margin: 20px;
+    opacity: 90%;
+}
+.userchat1{
+    display: flex;
+    flex-direction: row;
+    justify-content: left;
+    /* margin: 16px; */
+    /* background-color: #ce5151; */
+}
+.userchat2{
+    display: flex;
+    flex-direction: row;
+    justify-content: right;
+    /* margin: 16px; */
+    /* background-color: #ce5151; */
+}
+.center{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: #201f1f;
 }

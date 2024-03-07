@@ -25,7 +25,20 @@
           </div>
         </div>
         <div class="chat">
-          <button class="next" id="skipButton">Skip</button>
+          <div class="center">
+            <div class="card">
+              <div class="chat-input">
+
+             
+              </div>
+            </div>
+            
+      <div class="input-card">
+        <label class="input-label"></label>
+        <input type="text" name="" class="message" maxlength="100"  placeholder="Write a message">
+        <button onclick="sendChat()">Send</button>
+      </div>
+          
         </div>
       </div>
     </div>
@@ -33,4 +46,16 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/static/handlers.js"></script>
   <script src="/static/main.js"></script>
+  <script >
+
+var chats=document.getElementsByClassName("chat-input");
+chats[0].innerHTML+="<div class="+"userchat2"+"><span class="+"user2chat"+">"+"hello"+"</span>"+'</div>'
+function sendChat(){
+  var msg=document.getElementsByClassName("message");
+  console.log("chats",msg);
+  chats[0].innerHTML+="<div class="+"userchat1"+"><span class="+"user1chat"+">"+msg[0].value+"</span>"+'</div>';
+  msg[0].value="";
+}
+
+  </script>
 </html>
