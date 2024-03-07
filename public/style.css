@@ -168,18 +168,7 @@ body{
     /* width: 85%; */
     /* margin-left: 5px; */
 }
-.input-card button{
-    margin: 16px;
-    border-radius: 15px;
-    padding: 5px;
-    background-color: #ce5151;
-}
-.input-card .message{
-    border-radius: 5px;
-    padding: 5px;
-    margin: 16px;
-    /* width: 80%; */
-}
+
 .chat-input{
     overflow: auto;
     /* background-color: #eee9e9; */
@@ -229,3 +218,27 @@ background-color: rgb(233, 154, 9);
     border-radius: 5px;
 background-color: #e24211;
 }
+.message{
+    padding: 16px;
+    border-radius: 15px;
+}
+.send{
+    padding: 16px;
+    padding-left: 30px;
+    padding-right: 30px;
+    border-radius: 15px;
+    background-color: #1d66d4;
+    margin: 16px;
+}
+/* .input-card button{
+    margin: 16px;
+    border-radius: 15px;
+    padding: 5px;
+    background-color: #ce5151;
+}
+.input-card .message{
+    border-radius: 5px;
+    padding: 5px;
+    margin: 16px;
+    width: 80%;
+} */
