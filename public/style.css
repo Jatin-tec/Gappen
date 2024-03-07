@@ -133,7 +133,7 @@ body{
 }
 .card{
     overflow: auto;
-    background-color: #eee9e9;
+    background-color: #3a3535;
     border-radius: 5px;
     width: 80%;
     height: 60vh;
@@ -143,18 +143,20 @@ body{
 .user1chat{
     /* display: flex; */
     /* justify-content: left; */
-    padding: 5px;
+    padding: 15px;
     border-radius: 5px;
-    background-color: #ce5151;
+    background-color: #747264;
+    color: white;
     margin: 5px;
 }
 .user2chat{
     /* display: flex; */
     /* justify-content: right; */
-    padding: 5px;
+    padding: 15px;
     border-radius: 5px;
     /* margin: 16px; */
-    background-color: #ce5151;
+    background-color: #40A2E3;
+    color: white;
     margin: 5px;
 }
 .input-card{
@@ -180,7 +182,7 @@ body{
 }
 .chat-input{
     overflow: auto;
-    background-color: #eee9e9;
+    /* background-color: #eee9e9; */
     border-radius: 5px;
     /* height: 80%; */
     margin: 20px;
@@ -205,5 +207,25 @@ body{
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    border-radius: 12px;
     background-color: #201f1f;
+}
+.buttons-div{
+    /* margin: 35px; */
+}
+.buttons-div button{
+    padding: 16px;
+    margin: 20px;
+}
+.skip{
+    border-radius: 5px;
+background-color: #c2d41d;
+}
+.home{
+    border-radius: 5px;
+background-color: rgb(233, 154, 9);
+}
+.report{
+    border-radius: 5px;
+background-color: #e24211;
 }

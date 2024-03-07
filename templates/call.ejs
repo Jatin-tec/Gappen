@@ -35,10 +35,10 @@
             
       <div class="input-card">
         <label class="input-label"></label>
-        <input type="text" name="" class="message" maxlength="100"  placeholder="Write a message">
+        <input type="text" name="" class="message" maxlength="50"  placeholder="Write a message">
         <button onclick="sendChat()">Send</button>
       </div>
-          
+          <div class="buttons-div"><button class="home">Home</button><button class="report">Report</button> <button class="skip">Skip</button></div>
         </div>
       </div>
     </div>
@@ -49,11 +49,13 @@
   <script >
 
 var chats=document.getElementsByClassName("chat-input");
-chats[0].innerHTML+="<div class="+"userchat2"+"><span class="+"user2chat"+">"+"hello"+"</span>"+'</div>'
+chats[0].innerHTML+="<div class="+"userchat1"+"><p class="+"user1chat"+">"+"hello"+"</p>"+'</div><hr>';
+chats[0].innerHTML+="<div class="+"userchat2"+"><p class="+"user2chat"+">"+"Hii"+"</p>"+'</div><hr>';
+chats[0].innerHTML+="<div class="+"userchat1"+"><p class="+"user1chat"+">"+"How are you?"+"</p>"+'</div><hr>';
 function sendChat(){
   var msg=document.getElementsByClassName("message");
   console.log("chats",msg);
-  chats[0].innerHTML+="<div class="+"userchat1"+"><span class="+"user1chat"+">"+msg[0].value+"</span>"+'</div>';
+  chats[0].innerHTML+="<div class="+"userchat2"+"><p class="+"user2chat"+">"+msg[0].value+"</p>"+'</div><hr>';
   msg[0].value="";
 }
 
