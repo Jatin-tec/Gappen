@@ -27,6 +27,7 @@ const handleOffer = async (offer, roomId) => {
 };
 
 const handleAnswer = async (answer) => {
+    console.log('Received answer');
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
 };
 

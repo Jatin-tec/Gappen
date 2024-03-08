@@ -99,7 +99,9 @@ function registerSocketEvents(io, socket, client) {
 
 async function addUserToWaitingList(socket, queueName, userName, client) {
     await client.sAdd(queueName, socket.id);
-    await client.set(`user:${socket.id}`, userName);
+    if (!client.get(`user:${socket.id}`)) {
+        await client.set(`user:${socket.id}`, userName);
+    }
     const waitingUsers = await client.sCard(queueName);
     console.log(`User ${socket.id} added to waiting list ${queueName}. Waiting users: ${waitingUsers}`);
 }
