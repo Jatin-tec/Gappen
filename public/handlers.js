@@ -1,6 +1,5 @@
-const handleRoomJoined = async (roomId, users) => {
-    console.log(`Joined room: ${roomId}`);
-    document.getElementById('username2').innerText = users['user2'].name;
+const handleRoomJoined = async (roomId) => {
+    document.getElementById('roomId').innerText = roomId;
     if (!peerConnection) {
         createPeerConnection(roomId);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
@@ -11,6 +10,11 @@ const handleRoomJoined = async (roomId, users) => {
         }
     }
 };
+
+const handleSetUsername = (username) => {
+    console.log(`Your username is: ${username}`);
+    document.getElementById('remoteUsername').innerText = username;
+}
 
 const handleOffer = async (offer, roomId) => {
     if (!peerConnection) {
@@ -35,7 +39,7 @@ function createPeerConnection(roomId) {
     peerConnection.ontrack = event => {
         if (event.streams && event.streams[0]) {
             console.log(`Received remote stream: ${event.streams[0]}`);
-            document.getElementById('user-2').srcObject = event.streams[0];
+            document.getElementById('remoteUser').srcObject = event.streams[0];
         }
     };
     peerConnection.onicecandidate = event => {
@@ -51,8 +55,23 @@ skipButton.addEventListener("click", function () {
     resetVideoCall(); // Function to reset or clear the current video call setup
 });
 
-const handleSkip = (skippedUserId) => {
-    console.log(`User ${skippedUserId} skipped the call.`);
+const sendMessageButton = document.getElementById("sendMessage");
+sendMessageButton.addEventListener("click", function () {
+    const message = document.getElementById('messageInput').value;
+    const roomId = document.getElementById('roomId').innerText;
+    var chats = document.getElementsByClassName("chat-input");
+    chats[0].innerHTML += "<div class=" + "userchat1" + "><p class=" + "user1chat" + ">" + message + "</p>" + '</div><hr>';
+    socket.emit("send-message", message, roomId);
+});
+
+const handleReceiveMessage = (message) => {
+    console.log(`Received message: ${message}`);
+
+    var chats = document.getElementsByClassName("chat-input");
+    chats[0].innerHTML += "<div class=" + "userchat2" + "><p class=" + "user2chat" + ">" + message + "</p>" + '</div><hr>';
+}
+
+const handleSkip = () => {
     resetVideoCall(); // Handle resetting the call on the other user's end as well
 };
 
@@ -63,6 +82,10 @@ function resetVideoCall() {
         peerConnection = null;
     }
     // Optionally, clear the remote video display or show a message
-    document.getElementById('user-2').srcObject = null;
+    document.getElementById('remoteUser').srcObject = null;
     socket.emit('join');
 }
+
+const handlePartnerDisconnected = () => {
+    resetVideoCall(); // Handle resetting the call on the other user's end as well
+};
