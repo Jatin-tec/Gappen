@@ -1,6 +1,7 @@
 var localStream = null;
 var remoteStream = null;
 var peerConnection = null;
+var candidateQueue = []; // Queue for storing candidates before the offer/answer is sent
 
 const handleRoomJoined = async (roomId) => {
     document.getElementById('roomId').innerText = roomId;
@@ -10,7 +11,22 @@ const handleRoomJoined = async (roomId) => {
         if (socket.id < roomId.split('-')[1]) { // Simple way to decide who creates the offer
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
-            socket.emit('offer', offer, roomId);
+
+            // Listen for the icegatheringstatechange event
+            peerConnection.addEventListener('icegatheringstatechange', async (event) => {
+                if (peerConnection.iceGatheringState === 'complete') {
+                    // Once the ICE gathering state is 'complete', send the offer
+                    socket.emit('offer', offer, roomId);
+                    // After sending the offer, emit any queued candidates
+                    while (candidateQueue.length > 0) {
+                        const candidate = candidateQueue.shift();
+                        socket.emit('ice-candidate', candidate, roomId);
+                    }
+                }
+            });
+            
+            // Trigger ICE gathering
+            peerConnection.iceGatheringState === 'new' && peerConnection.restartIce();
         }
     }
 };
@@ -28,7 +44,21 @@ const handleOffer = async (offer, roomId) => {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
-    socket.emit('answer', answer, roomId);
+    // Listen for the icegatheringstatechange event
+    peerConnection.addEventListener('icegatheringstatechange', async (event) => {
+        if (peerConnection.iceGatheringState === 'complete') {
+            // Once the ICE gathering state is 'complete', send the answer
+            socket.emit('answer', answer, roomId);
+            // After sending the offer, emit any queued candidates
+            while (candidateQueue.length > 0) {
+                const candidate = candidateQueue.shift();
+                socket.emit('ice-candidate', candidate, roomId);
+            }
+
+        }
+    });
+    // Trigger ICE gathering if needed
+    peerConnection.iceGatheringState === 'new' && peerConnection.restartIce();
 };
 
 const handleAnswer = async (answer) => {
@@ -61,7 +91,10 @@ function createPeerConnection(roomId) {
     };
     peerConnection.onicecandidate = event => {
         if (event.candidate) {
-            socket.emit('ice-candidate', event.candidate, roomId);
+            console.log('Generated candidate:', event.candidate);
+            candidateQueue.push(event.candidate);
+
+            // socket.emit('ice-candidate', event.candidate, roomId);
         }
     };
 }
