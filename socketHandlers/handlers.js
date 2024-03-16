@@ -10,7 +10,8 @@ function registerSocketEvents(io, socket, client) {
     });
 
     socket.on("ice-candidate", (candidate, roomName) => {
-        socket.to(roomName).emit("ice-candidate", candidate);
+        console.log(`Received ICE candidate from ${socket.id} in room ${roomName} ${candidate}`);
+        socket.to(roomName).emit("ice-candidate", candidate, roomName);
     });
 
     socket.on("offer", (offer, roomName) => {

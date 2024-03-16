@@ -32,15 +32,23 @@ const handleAnswer = async (answer) => {
 };
 
 const handleCandidate = async (candidate, roomId) => {
+    console.log(`Received candidate: ${candidate}`);
     peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
 };
 
 function createPeerConnection(roomId) {
+    const servers = {
+        iceServers: [
+            {
+                urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
+            },
+        ],
+    };
     peerConnection = new RTCPeerConnection(servers);
     peerConnection.ontrack = event => {
         if (event.streams && event.streams[0]) {
             console.log(`Received remote stream: ${event.streams[0]}`);
-            document.getElementById('remoteUser').srcObject = event.streams[0];
+            document.getElementById('remoteStream').srcObject = event.streams[0];
         }
     };
     peerConnection.onicecandidate = event => {
@@ -83,7 +91,7 @@ function resetVideoCall() {
         peerConnection = null;
     }
     // Optionally, clear the remote video display or show a message
-    document.getElementById('remoteUser').srcObject = null;
+    document.getElementById('remoteStream').srcObject = null;
     socket.emit('join');
 }
 

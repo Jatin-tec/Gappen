@@ -1,12 +1,5 @@
 // client/main.js
 const socket = io();
-const servers = {
-  iceServers: [
-    {
-      urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-    },
-  ],
-};
 
 let localStream = null;
 let remoteStream = null;
@@ -15,7 +8,7 @@ let peerConnection = null;
 async function initializeChat() {
     try {
       localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
-      document.getElementById('localUser').srcObject = localStream;
+      document.getElementById('localStream').srcObject = localStream;
       const username = document.getElementById('localUsername').getAttribute('data-username');
       socket.emit('join', username);
     } catch (error) {
