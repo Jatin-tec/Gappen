@@ -21,6 +21,7 @@ const handleSetUsername = (username) => {
 }
 
 const handleOffer = async (offer, roomId) => {
+    console.log(`Received offer`, offer);
     if (!peerConnection) {
         createPeerConnection(roomId);
     }
@@ -31,12 +32,12 @@ const handleOffer = async (offer, roomId) => {
 };
 
 const handleAnswer = async (answer) => {
-    console.log('Received answer');
+    console.log(`Received answer`, answer);
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
 };
 
 const handleCandidate = async (candidate, roomId) => {
-    console.log(`Received candidate: ${candidate}`);
+    console.log(`Received candidate:`, candidate);
     peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
 };
 
@@ -56,7 +57,7 @@ function createPeerConnection(roomId) {
     peerConnection = new RTCPeerConnection(servers);
     peerConnection.ontrack = event => {
         if (event.streams && event.streams[0]) {
-            console.log(`Received remote stream: ${event.streams[0]}`);
+            console.log('Received remote stream:', event.streams[0]);
             document.getElementById('remoteStream').srcObject = event.streams[0];
         }
     };
