@@ -5,21 +5,20 @@ function registerSocketEvents(io, socket, client) {
         attemptToMatchUsers(io, queueName, client);
     });
 
-    socket.on("ready", (roomName) => {
-        socket.to(roomName).emit("ready");
-    });
-
     socket.on("ice-candidate", (candidate, roomName) => {
         console.log(`Received ICE candidate from ${socket.id} in room ${roomName} ${candidate}`);
-        socket.to(roomName).emit("ice-candidate", candidate, roomName);
+        const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
+        socket.to(reciverId).emit("ice-candidate", candidate, roomName);
     });
 
     socket.on("offer", (offer, roomName) => {
-        socket.to(roomName).emit("offer", offer, roomName);
+        const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
+        socket.to(reciverId).emit("offer", offer, roomName);
     });
 
     socket.on("answer", (answer, roomName) => {
-        socket.to(roomName).emit("answer", answer);
+        const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
+        socket.to(reciverId).emit("answer", answer);
     });
 
     socket.on("send-message", (message, roomId) => {
