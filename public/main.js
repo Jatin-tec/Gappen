@@ -1,10 +1,6 @@
 // client/main.js
 const socket = io();
 
-let localStream = null;
-let remoteStream = null;
-let peerConnection = null;
-
 async function initializeChat() {
     try {
       localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });

@@ -1,3 +1,7 @@
+var localStream = null;
+var remoteStream = null;
+var peerConnection = null;
+
 const handleRoomJoined = async (roomId) => {
     document.getElementById('roomId').innerText = roomId;
     if (!peerConnection) {
