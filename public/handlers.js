@@ -44,13 +44,11 @@ const handleCandidate = async (candidate, roomId) => {
 function createPeerConnection(roomId) {
     const servers = {
         iceServers: [
-            { 
-                urls: 'stun:s1.taraba.net:3478' 
-            }, 
             {
-                urls: 'turn:turn.anyfirewall.com:443?transport=tcp',
-                credential: 'webrtc',
-                username: 'webrtc'
+                urls:[
+                    'stun:stun.l.google.com:19302',
+                    'stun:stun1.l.google.com:19302'
+                ]
             }
         ],
     };
