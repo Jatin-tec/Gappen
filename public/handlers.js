@@ -44,7 +44,7 @@ function createPeerConnection(roomId) {
     const servers = {
         iceServers: [
             {
-                urls: ['stun:s1.taraba.net:3478', 'stun:s2.taraba.net:3478'],
+                urls: ['stun:s1.taraba.net:3478', 'turn:turn01.hubl.in?transport=udp'],
             },
         ],
     };
