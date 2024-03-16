@@ -44,7 +44,7 @@ function createPeerConnection(roomId) {
     const servers = {
         iceServers: [
             {
-                urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
+                urls: ['stun:s1.taraba.net:3478', 'stun:s2.taraba.net:3478'],
             },
         ],
     };
