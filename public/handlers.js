@@ -38,7 +38,7 @@ const handleAnswer = async (answer) => {
 
 const handleCandidate = async (candidate, roomId) => {
     console.log(`Received candidate:`, candidate);
-    peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+    peerConnection.addIceCandidate(candidate);
 };
 
 function createPeerConnection(roomId) {
