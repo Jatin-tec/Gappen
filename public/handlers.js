@@ -8,7 +8,7 @@ var state_queue = []
 const handleRoomJoined = async (roomId) => {
     document.getElementById('roomId').innerText = roomId;
     if (!peerConnection) {
-        createPeerConnection(roomId);
+        await createPeerConnection(roomId);
         console.log(localStream);
 
         if (socket.id === roomId.split('-')[1]) { // Decide who creates the offer
@@ -22,7 +22,7 @@ const handleRoomJoined = async (roomId) => {
 const handleOffer = async (offer, roomId) => {
     console.log(`Received offer`, offer);
     if (!peerConnection) {
-        createPeerConnection(roomId);
+        await createPeerConnection(roomId);
     }
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
