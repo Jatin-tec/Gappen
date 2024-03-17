@@ -6,9 +6,9 @@ function registerSocketEvents(io, socket, client) {
     });
 
     socket.on("ice-candidate", (candidate, roomName) => {
-        console.log(`Received ICE candidate from ${socket.id} in room ${roomName} ${candidate}`);
+        console.log(`Received ICE candidate from ${socket.id} in room ${roomName}`);
         const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
-        socket.to(reciverId).emit("ice-candidate", candidate, roomName);
+        socket.to(reciverId).emit("ice-candidate", candidate);
     });
 
     socket.on("offer", (offer, roomName) => {

@@ -3,38 +3,21 @@ var remoteStream = null;
 var peerConnection = null;
 var candidateQueue = []; // Queue for storing candidates before the offer/answer is sent
 
+var state_queue = []
+
 const handleRoomJoined = async (roomId) => {
     document.getElementById('roomId').innerText = roomId;
     if (!peerConnection) {
         createPeerConnection(roomId);
-        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-        if (socket.id < roomId.split('-')[1]) { // Simple way to decide who creates the offer
+        console.log(localStream);
+
+        if (socket.id === roomId.split('-')[1]) { // Decide who creates the offer
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
-
-            // Listen for the icegatheringstatechange event
-            peerConnection.addEventListener('icegatheringstatechange', async (event) => {
-                if (peerConnection.iceGatheringState === 'complete') {
-                    // Once the ICE gathering state is 'complete', send the offer
-                    socket.emit('offer', offer, roomId);
-                    // After sending the offer, emit any queued candidates
-                    while (candidateQueue.length > 0) {
-                        const candidate = candidateQueue.shift();
-                        socket.emit('ice-candidate', candidate, roomId);
-                    }
-                }
-            });
-            
-            // Trigger ICE gathering
-            peerConnection.iceGatheringState === 'new' && peerConnection.restartIce();
+            socket.emit('offer', offer, roomId);
         }
     }
 };
-
-const handleSetUsername = (username) => {
-    console.log(`Your username is: ${username}`);
-    document.getElementById('remoteUsername').innerText = username;
-}
 
 const handleOffer = async (offer, roomId) => {
     console.log(`Received offer`, offer);
@@ -42,23 +25,11 @@ const handleOffer = async (offer, roomId) => {
         createPeerConnection(roomId);
     }
     await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
-    // Listen for the icegatheringstatechange event
-    peerConnection.addEventListener('icegatheringstatechange', async (event) => {
-        if (peerConnection.iceGatheringState === 'complete') {
-            // Once the ICE gathering state is 'complete', send the answer
-            socket.emit('answer', answer, roomId);
-            // After sending the offer, emit any queued candidates
-            while (candidateQueue.length > 0) {
-                const candidate = candidateQueue.shift();
-                socket.emit('ice-candidate', candidate, roomId);
-            }
 
-        }
-    });
-    // Trigger ICE gathering if needed
-    peerConnection.iceGatheringState === 'new' && peerConnection.restartIce();
+    socket.emit('answer', answer, roomId);   
 };
 
 const handleAnswer = async (answer) => {
@@ -66,37 +37,53 @@ const handleAnswer = async (answer) => {
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
 };
 
-const handleCandidate = async (candidate, roomId) => {
+const handleCandidate = async (candidate) => {
     console.log(`Received candidate:`, candidate);
     peerConnection.addIceCandidate(candidate);
 };
 
 function createPeerConnection(roomId) {
-    const servers = {
-        iceServers: [
-            {
-                urls:[
-                    'stun:stun.l.google.com:19302',
-                    'stun:stun1.l.google.com:19302'
-                ]
-            }
-        ],
-    };
-    peerConnection = new RTCPeerConnection(servers);
-    peerConnection.ontrack = event => {
-        if (event.streams && event.streams[0]) {
-            console.log('Received remote stream:', event.streams[0]);
-            document.getElementById('remoteStream').srcObject = event.streams[0];
-        }
-    };
-    peerConnection.onicecandidate = event => {
-        if (event.candidate) {
-            console.log('Generated candidate:', event.candidate);
-            candidateQueue.push(event.candidate);
+    return new Promise((resolve, reject) => {
+        const servers = {
+            iceServers: [
+                {
+                    urls:[
+                        'stun:stun.l.google.com:19302',
+                        'stun:stun1.l.google.com:19302'
+                    ]
+                }
+            ],
+        };
+        peerConnection = new RTCPeerConnection(servers);
+        
+        // Add tracks from the local stream to the peer connection
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
+        // Listen for negotiationneeded event
+        peerConnection.addEventListener("signalingstatechange", (event) => {
+            console.log('signaling state event', event);
+            console.log('signaling state', peerConnection.signalingState)
+        });
 
-            // socket.emit('ice-candidate', event.candidate, roomId);
-        }
-    };
+        // Listen for ICE candidates
+        peerConnection.onicecandidate = event => {
+            if (event.candidate) {
+                console.log('Generated candidate:', event.candidate);
+                // candidateQueue.push(event.candidate);
+                socket.emit('ice-candidate', event.candidate, roomId);
+            }
+        };
+
+        // Listen for track events
+        peerConnection.ontrack = event => {
+            if (event.streams && event.streams[0]) {
+                console.log('Received remote stream:', event.streams[0]);
+                document.getElementById('remoteStream').srcObject = event.streams[0];
+            }
+        };
+        
+        resolve();
+    });
 }
 
 const skipButton = document.getElementById("skipButton");
@@ -113,6 +100,11 @@ sendMessageButton.addEventListener("click", function () {
     chats[0].innerHTML += "<div class=" + "userchat1" + "><p class=" + "user1chat" + ">" + message + "</p>" + '</div><hr>';
     socket.emit("send-message", message, roomId);
 });
+
+const handleSetUsername = (username) => {
+    console.log(`Your username is: ${username}`);
+    document.getElementById('remoteUsername').innerText = username;
+}
 
 const handleReceiveMessage = (message) => {
     console.log(`Received message: ${message}`);

@@ -13,10 +13,12 @@ async function initializeChat() {
   }
 
 socket.on('roomJoined', handleRoomJoined)
-socket.on('setUsername', handleSetUsername)
+
 socket.on('offer', (offer, roomId) => handleOffer(offer, roomId))
 socket.on('answer', (answer, roomId) => handleAnswer(answer, roomId))
-socket.on('ice-candidate', (candidate, roomId) => handleCandidate(candidate, roomId))
+socket.on('ice-candidate', (candidate) => handleCandidate(candidate))
+
+socket.on('setUsername', handleSetUsername)
 socket.on('userSkipped', () => handleSkip())
 socket.on('skip', () => handleSkip())
 socket.on('partnerDisconnected', () => handlePartnerDisconnected())
