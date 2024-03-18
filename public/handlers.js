@@ -3,47 +3,47 @@ var remoteStream = null;
 var peerConnection = null;
 
 
-const handleRoomJoined = async (roomId) => {
+const handleCreateOffer = async (remoteUsername, roomId) => {
     document.getElementById('roomId').innerText = roomId;
-    if (socket.id === roomId.split('-')[1]) { // Decide who creates the offer
-        await createPeerConnection(roomId);
-        console.log(localStream);
-        
-        const offer = await peerConnection.createOffer();
-        await peerConnection.setLocalDescription(offer);
-        socket.emit('offer', offer, roomId);
-    }
+    document.getElementById('remoteUsername').innerText = remoteUsername;
+
+    await createPeerConnection(roomId);
+
+    console.log('Creating offer for', remoteUsername);
+    console.log("localStream", localStream);
+    
+    const offer = await peerConnection.createOffer();
+    await peerConnection.setLocalDescription(offer);
+    socket.emit('offer', offer, roomId);
+
 };
 
-const handleOffer = async (offer, roomId, candidateQueue) => {
+const handleCreatePear = async (remoteUsername, roomId) => {
+    document.getElementById('roomId').innerText = roomId;
+    document.getElementById('remoteUsername').innerText = remoteUsername;
+
+    await createPeerConnection(roomId);
+
+    console.log('Awaiting offer from', remoteUsername);
+    console.log("localStream", localStream);
+}
+
+const handleOffer = async (offer, roomId) => {
     console.log(`Received offer`, offer);
-    if (!peerConnection) {
-        console.log('Creating peer connection for offer');
-        await createPeerConnection(roomId, offer);
-    }
+
+    peerConnection.setRemoteDescription(offer.offer);
 
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);   
- 
-    console.log('Candidate queue:', candidateQueue);
-    candidateQueue.forEach(async (candidate) => {
-        console.log('================Adding candidate===========', candidate);
-        await peerConnection.addIceCandidate(candidate);
-    });
-
+    
+    console.log('Sending answer:', answer);
     socket.emit('answer', answer, roomId);
 };
 
-const handleAnswer = async (answer, candidateQueue) => {
+const handleAnswer = async (answer, roomId) => {
     console.log(`Received answer`, answer);
-    console.log('Candidate queue:', candidateQueue);
 
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
-    
-    candidateQueue.forEach(async (candidate) => {
-        console.log('================Adding candidate===========', candidate);
-        await peerConnection.addIceCandidate(candidate);
-    });
+    await peerConnection.setRemoteDescription(answer.answer);
 };
 
 const handleCandidate = async (candidate) => {
@@ -51,7 +51,7 @@ const handleCandidate = async (candidate) => {
     peerConnection.addIceCandidate(candidate);
 };
 
-function createPeerConnection(roomId, offer) {
+function createPeerConnection(roomId=null) {
     return new Promise((resolve, reject) => {
         const servers = {
             iceServers: [
@@ -78,7 +78,6 @@ function createPeerConnection(roomId, offer) {
         peerConnection.onicecandidate = event => {
             if (event.candidate) {
                 console.log('Generated candidate:', event.candidate);
-                // candidateQueue.push(event.candidate);
                 socket.emit('ice-candidate', event.candidate, roomId);
             }
         };
@@ -91,11 +90,6 @@ function createPeerConnection(roomId, offer) {
                 document.getElementById('remoteStream').srcObject = event.streams[0];
             }
         };
-        
-        if (offer) {
-            peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-        }
-
         resolve();
     });
 }
@@ -106,11 +100,12 @@ skipButton.addEventListener("click", function () {
     resetVideoCall(); // Function to reset or clear the current video call setup
 });
 
-const sendMessageButton = document.getElementById("sendMessage");
+const sendMessageButton = document.getElementById("send");
 sendMessageButton.addEventListener("click", function () {
-    const message = document.getElementById('messageInput').value;
+    const message = document.getElementById('textInput').value;
+    document.getElementById('textInput').value="";
     const roomId = document.getElementById('roomId').innerText;
-    var chats = document.getElementsByClassName("chat-input");
+    var chats = document.getElementsByClassName("send-message");
     chats[0].innerHTML += "<div class=" + "userchat1" + "><p class=" + "user1chat" + ">" + message + "</p>" + '</div><hr>';
     socket.emit("send-message", message, roomId);
 });

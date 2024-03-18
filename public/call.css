@@ -1,0 +1,115 @@
+.container{
+    background-color: rgb(160, 168, 165);
+    height: 99vh;
+    width: 100%;
+}
+.video{
+    display: flex;
+    justify-content: space-evenly;
+    object-fit:fill;
+}
+.user{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px;
+    background-color: rgb(0, 0, 0);
+}
+.user1{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+    margin: 10px;
+    background-color: rgb(90, 87, 87);
+
+}
+.msgchat{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 1;
+   
+    margin: 10px;
+    background-color: rgb(105, 15, 15);
+}
+.video-player{
+    margin: 10px;
+}
+.header{
+    background-color: brown;
+    width: 100%;
+    /* height: 10vh; */
+}
+.username{
+    display: flex;
+    justify-content: space-around;
+}
+.usercontainer{
+    background-color: azure;
+    padding: 6px;
+    margin: 5px;
+    border-radius: 10px;
+}
+.buttons-div{
+    display: flex;
+    justify-content: space-around;
+    /* margin: 10px; */
+}
+.btns{
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 2px;
+    cursor: pointer;
+}
+
+footer {
+    background-color: #343a40; /* Dark gray footer */
+    color: #fff;
+    padding: 40px 0;
+  }
+  
+  .footer-content {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  .footer-logo img {
+    width: 150px;
+    height: auto;
+  }
+  
+  .footer-info, .footer-disclaimer {
+    flex: 1;
+    margin: 20px;
+  }
+  
+  .footer-info h2, .footer-disclaimer h2 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+  }
+  
+  .footer-info p, .footer-disclaimer p {
+    color: #ccc;
+    margin-bottom: 10px;
+  }
+  
+  .footer-bottom {
+    text-align: center;
+    background-color: #212529; /* Darker footer bottom */
+    padding: 10px 0;
+  }
+  
+  .footer-bottom p {
+    color: #ccc;
+  }

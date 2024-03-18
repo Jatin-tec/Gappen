@@ -63,7 +63,7 @@ body{
     width: 100vw;
     background-color: #b62828;
 } */
-.inside{
+/* .inside{
     border-radius: 15px;
     display: flex;
     justify-content: center;
@@ -99,7 +99,6 @@ body{
     border-radius: 15px;
     flex: 1;
     height: 80vh;
-    /* width: 00px; */
     background-color: #ddc8c8;
 }
 .user1 {
@@ -107,7 +106,6 @@ body{
     top: 0;
     left: 0;
     padding-top: 5px;
-    /* height: 200px; */
     aspect-ratio:auto;
     background-color: rgb(255, 255, 255);
     border-radius: 15px;
@@ -139,10 +137,8 @@ body{
     height: 60vh;
     margin: 20px;
     opacity: 90%;
-}
-.user1chat{
-    /* display: flex; */
-    /* justify-content: left; */
+} */
+/* .user1chat{
     padding: 15px;
     border-radius: 5px;
     background-color: #747264;
@@ -150,11 +146,9 @@ body{
     margin: 5px;
 }
 .user2chat{
-    /* display: flex; */
-    /* justify-content: right; */
     padding: 15px;
     border-radius: 5px;
-    /* margin: 16px; */
+
     background-color: #40A2E3;
     color: white;
     margin: 5px;
@@ -163,33 +157,22 @@ body{
     display: flex;
     justify-content: center;
     align-items: center;
-    /* position: sticky; */
-    /* height: 10%; */
-    /* width: 85%; */
-    /* margin-left: 5px; */
 }
 
 .chat-input{
     overflow: auto;
-    /* background-color: #eee9e9; */
     border-radius: 5px;
-    /* height: 80%; */
     margin: 20px;
     opacity: 90%;
 }
 .userchat1{
     display: flex;
     flex-direction: row;
-    justify-content: left;
-    /* margin: 16px; */
-    /* background-color: #ce5151; */
-}
+    justify-content: left;}
 .userchat2{
     display: flex;
     flex-direction: row;
     justify-content: right;
-    /* margin: 16px; */
-    /* background-color: #ce5151; */
 }
 .center{
     display: flex;
@@ -199,9 +182,7 @@ body{
     border-radius: 12px;
     background-color: #201f1f;
 }
-.buttons-div{
-    /* margin: 35px; */
-}
+
 .buttons-div button{
     padding: 16px;
     margin: 20px;
@@ -229,16 +210,124 @@ background-color: #e24211;
     border-radius: 15px;
     background-color: #1d66d4;
     margin: 16px;
-}
-/* .input-card button{
-    margin: 16px;
-    border-radius: 15px;
-    padding: 5px;
-    background-color: #ce5151;
-}
-.input-card .message{
-    border-radius: 5px;
-    padding: 5px;
-    margin: 16px;
-    width: 80%;
 } */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f3f3f3;
+  }
+  
+  .container {
+    /* max-width: 800px; */
+    margin: 20px auto;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .header {
+    text-align: center;
+    padding: 20px;
+    border-bottom: 1px solid #ccc;
+  }
+  
+  .header h1 {
+    font-size: 28px;
+    color: #333;
+  }
+  
+  .usernames {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+  }
+  
+  .usercontainer {
+    margin: 0 10px;
+  }
+  
+  .usercontainer h2 {
+    font-size: 20px;
+    color: #555;
+  }
+  
+  .video {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .user {
+    width: 100%;
+    padding: 10px;
+  }
+  
+  .video-player {
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .msgchat {
+    width: 100%;
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .buttons-div {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .btns {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #0078D4;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btns:hover {
+    background-color: #005a9e;
+  }
+  @media (min-width: 768px) { /* Adjust for laptop-sized screens */
+    .container {
+      width: 80%;
+    }
+  
+    .header {
+      padding: 30px;
+    }
+  
+    .header h1 {
+      font-size: 32px;
+    }
+  
+    .user {
+      width: 50%;
+      padding: 20px;
+    }
+  
+    .msgchat {
+      width: 100%;
+      text-align: center;
+      margin-top: 30px;
+    }
+  
+    .buttons-div {
+      margin-top: 30px;
+    }
+  }
+  
+  

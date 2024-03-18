@@ -5,6 +5,7 @@ async function initializeChat() {
     try {
       localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
       document.getElementById('localStream').srcObject = localStream;
+
       const username = document.getElementById('localUsername').getAttribute('data-username');
       socket.emit('join', username);
     } catch (error) {
@@ -12,10 +13,11 @@ async function initializeChat() {
     }
   }
 
-socket.on('roomJoined', handleRoomJoined)
+socket.on('create-offer', (remoteUsername, roomId) => handleCreateOffer(remoteUsername, roomId))
+socket.on('create-pear', (remoteUsername, roomId) => handleCreatePear(remoteUsername, roomId))
 
-socket.on('offer', (offer, roomId, candidateQueue) => handleOffer(offer, roomId, candidateQueue))
-socket.on('answer', (answer, candidateQueue) => handleAnswer(answer, candidateQueue))
+socket.on('offer', (offer, roomId) => handleOffer(offer, roomId))
+socket.on('answer', (answer, roomId) => handleAnswer(answer, roomId))
 socket.on('ice-candidate', (candidate) => handleCandidate(candidate))
 
 socket.on('setUsername', handleSetUsername)

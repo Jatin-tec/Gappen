@@ -6,64 +6,37 @@ function registerSocketEvents(io, socket, client) {
     });
 
     socket.on("ice-candidate", async (candidate, roomName) => {
-        console.log(`Received ICE candidate from ${socket.id} in room ${roomName}`);
-        const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
-        
-        // store the candidate for later use in redis
-        const iceCandidatesKey = `iceCandidates:${socket.id}`;
-        try {
-            await client.rPush(iceCandidatesKey, JSON.stringify(candidate));
-            const candidates = await client.lRange(iceCandidatesKey, 0, -1);
-            console.log(`Stored candidate for ${socket.id}:`, candidate, candidates);
-        } catch (err) {
-            console.error(`Error storing ICE candidate: ${err}`);
+        const room = await client.get(roomName);
+        const roomData = JSON.parse(room);
+
+        if (socket.id === roomData.offerSocketId) {
+            roomData.offerIceCandidates.push(candidate);
+            socket.to(roomData.answerSocketId).emit("ice-candidate", candidate);
         }
-        socket.to(reciverId).emit("ice-candidate", candidate);
+        if (socket.id === roomData.answerSocketId) {
+            roomData.answererIceCandidates.push(candidate);
+            socket.to(roomData.offerSocketId).emit("ice-candidate", candidate);
+        }
+        await client.set(roomName, JSON.stringify(roomData));
     });
 
     socket.on("offer", async (offer, roomName) => {
-        const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
-        console.log(`Sending offer to ${reciverId}`);
-        
-        const candidateQueue = await waitForAtLeastOneCandidate();
-        const candidate = candidateQueue.map(candidate => JSON.parse(candidate));
-
-        console.log(`Candidate queue`, candidate, socket.id);
-
-        socket.to(reciverId).emit("offer", offer, roomName, candidate);
+        let room = await client.get(roomName);
+        room = JSON.parse(room);
+        room.offer = offer;
+        console.log(room);
+        await client.set(roomName, JSON.stringify(room));
+        socket.to(room.answerSocketId).emit("offer", room, roomName);
     });
 
-    async function waitForAtLeastOneCandidate(interval = 1000, timeout = 30000) {
-        const iceCandidatesKey = `iceCandidates:${socket.id}`
-        let totalTime = 0;
-    
-        return new Promise((resolve, reject) => {
-            const checkList = async () => {
-                try {
-                    const candidates = await client.lRange(iceCandidatesKey, 0, -1);
-                    if (candidates.length > 0) {
-                        resolve(candidates); // Resolve with the candidates
-                    } else if (totalTime < timeout) {
-                        totalTime += interval;
-                        setTimeout(checkList, interval); // Check again after the interval
-                    } else {
-                        reject(new Error('Timeout waiting for candidates'));
-                    }
-                } catch (error) {
-                    reject(error);
-                }
-            };
-            checkList();
-        });
-    }    
-
     socket.on("answer", async (answer, roomName) => {
-        const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
+        let room = await client.get(roomName);
+        room = JSON.parse(room);
+        room.answer = answer;
+        console.log(room);
+        await client.set(roomName, JSON.stringify(room));
 
-        const candidateQueue = await waitForAtLeastOneCandidate();
-        const candidate = candidateQueue.map(candidate => JSON.parse(candidate));
-
-        socket.to(reciverId).emit("answer", answer, candidate);
+        socket.to(room.offerSocketId).emit("answer", room, roomName);
     });
 
     socket.on("send-message", (message, roomId) => {
@@ -108,9 +81,20 @@ function registerSocketEvents(io, socket, client) {
     socket.on("disconnect", async () => {
         console.log(`User disconnected: ${socket.id}`);
 
-        // Remove the user from any waiting list they might be in and their room
-        const wasInQueueA = await client.sRem('waitingUsersA', socket.id);
-        const wasInQueueB = await client.sRem('waitingUsersB', socket.id);
+        async function removeUserFromWaitingList(queueName) {
+            const members = await client.sMembers(queueName);
+            for (const member of members) {
+                const data = JSON.parse(member);
+                if (data.socketId === socket.id) {
+                    await client.sRem(queueName, member);
+                    return true; // User was found and removed
+                }
+            }
+            return false; // User was not found in this queue
+        }
+    
+        const wasInQueueA = await removeUserFromWaitingList('waitingUsersA');
+        const wasInQueueB = await removeUserFromWaitingList('waitingUsersB');
         const oldRoom = await client.get(`room:${socket.id}`);
 
         if (oldRoom) {
@@ -143,32 +127,45 @@ function registerSocketEvents(io, socket, client) {
 }
 
 async function addUserToWaitingList(socket, queueName, userName, client) {
-    await client.sAdd(queueName, socket.id);
-    if (!client.get(`user:${socket.id}`)) {
-        await client.set(`user:${socket.id}`, userName);
-    }
+
+    await client.sAdd(queueName, JSON.stringify({"userName": userName, "socketId": socket.id}));
     const waitingUsers = await client.sCard(queueName);
+
     console.log(`User ${socket.id} added to waiting list ${queueName}. Waiting users: ${waitingUsers}`);
 }
 
 async function attemptToMatchUsers(io, queueName, client) {
     while (await client.sCard(queueName) >= 2) {
-        const user1Id = await client.sPop(queueName);
-        const user2Id = await client.sPop(queueName);
 
-        const roomName = `room-${user1Id}-${user2Id}`;
-        await client.set(`room:${user1Id}`, roomName);
-        await client.set(`room:${user2Id}`, roomName);
+        let user1 = await client.sPop(queueName);
+        let user2 = await client.sPop(queueName);
 
-        const user1Socket = io.sockets.sockets.get(user1Id);
-        const user2Socket = io.sockets.sockets.get(user2Id);
+        user1 = JSON.parse(user1);
+        user2 = JSON.parse(user2);
+
+        const roomName = `room-${user1.socketId}-${user2.socketId}`;
+
+        await client.set(roomName, JSON.stringify({
+            offererUserName: user1,
+            offer: null,
+            offerSocketId: user1.socketId,
+            offerIceCandidates: [],
+            answererUserName: user2,
+            answer: null,
+            answerSocketId: user2.socketId,
+            answererIceCandidates: []
+        }));
+    
+        const user1Socket = io.sockets.sockets.get(user1.socketId);
+        const user2Socket = io.sockets.sockets.get(user2.socketId);
 
         if (user1Socket && user2Socket) {
             user1Socket.join(roomName);
             user2Socket.join(roomName);
 
-            io.to(roomName).emit("roomJoined", roomName);
-            console.log(`Users ${user1Id} and ${user2Id} joined room ${roomName}`);
+            console.log(`Matched ${user1.userName} with ${user2.userName} in room ${roomName}`);
+            user2Socket.emit("create-pear", user1.userName, roomName);
+            user1Socket.emit("create-offer", user2.userName, roomName);
         }
     }
 }
