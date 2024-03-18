@@ -7,34 +7,45 @@ var state_queue = []
 
 const handleRoomJoined = async (roomId) => {
     document.getElementById('roomId').innerText = roomId;
-    if (!peerConnection) {
+    if (socket.id === roomId.split('-')[1]) { // Decide who creates the offer
         await createPeerConnection(roomId);
         console.log(localStream);
-
-        if (socket.id === roomId.split('-')[1]) { // Decide who creates the offer
-            const offer = await peerConnection.createOffer();
-            await peerConnection.setLocalDescription(offer);
-            socket.emit('offer', offer, roomId);
-        }
+        
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        socket.emit('offer', offer, roomId);
     }
 };
 
-const handleOffer = async (offer, roomId) => {
+const handleOffer = async (offer, roomId, candidateQueue) => {
     console.log(`Received offer`, offer);
     if (!peerConnection) {
-        await createPeerConnection(roomId);
+        console.log('Creating peer connection for offer');
+        await createPeerConnection(roomId, offer);
     }
-    await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
 
     const answer = await peerConnection.createAnswer();
-    await peerConnection.setLocalDescription(answer);
+    await peerConnection.setLocalDescription(answer);   
+ 
+    console.log('Candidate queue:', candidateQueue);
+    candidateQueue.forEach(candidate => {
+        console.log('================Adding candidate===========', candidate);
+        peerConnection.addIceCandidate(candidate);
+    });
 
-    socket.emit('answer', answer, roomId);   
+    socket.emit('answer', answer, roomId);
 };
 
-const handleAnswer = async (answer) => {
+const handleAnswer = async (answer, candidateQueue) => {
     console.log(`Received answer`, answer);
+    console.log('Candidate queue:', candidateQueue);
+
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    
+    candidateQueue.forEach(candidate => {
+        console.log('================Adding candidate===========', candidate);
+        peerConnection.addIceCandidate(candidate);
+    });
 };
 
 const handleCandidate = async (candidate) => {
@@ -42,7 +53,7 @@ const handleCandidate = async (candidate) => {
     peerConnection.addIceCandidate(candidate);
 };
 
-function createPeerConnection(roomId) {
+function createPeerConnection(roomId, offer) {
     return new Promise((resolve, reject) => {
         const servers = {
             iceServers: [
@@ -82,6 +93,10 @@ function createPeerConnection(roomId) {
             }
         };
         
+        if (offer) {
+            peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        }
+
         resolve();
     });
 }

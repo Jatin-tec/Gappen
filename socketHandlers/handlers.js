@@ -5,20 +5,65 @@ function registerSocketEvents(io, socket, client) {
         attemptToMatchUsers(io, queueName, client);
     });
 
-    socket.on("ice-candidate", (candidate, roomName) => {
+    socket.on("ice-candidate", async (candidate, roomName) => {
         console.log(`Received ICE candidate from ${socket.id} in room ${roomName}`);
         const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
+        
+        // store the candidate for later use in redis
+        const iceCandidatesKey = `iceCandidates:${socket.id}`;
+        try {
+            await client.rPush(iceCandidatesKey, JSON.stringify(candidate));
+            const candidates = await client.lRange(iceCandidatesKey, 0, -1);
+            console.log(`Stored candidate for ${socket.id}:`, candidate, candidates);
+        } catch (err) {
+            console.error(`Error storing ICE candidate: ${err}`);
+        }
         socket.to(reciverId).emit("ice-candidate", candidate);
     });
 
-    socket.on("offer", (offer, roomName) => {
+    socket.on("offer", async (offer, roomName) => {
         const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
-        socket.to(reciverId).emit("offer", offer, roomName);
+        console.log(`Sending offer to ${reciverId}`);
+        
+        const candidateQueue = await waitForAtLeastOneCandidate();
+        const candidate = candidateQueue.map(candidate => JSON.parse(candidate));
+
+        console.log(`Candidate queue`, candidate, socket.id);
+
+        socket.to(reciverId).emit("offer", offer, roomName, candidate);
     });
 
-    socket.on("answer", (answer, roomName) => {
+    async function waitForAtLeastOneCandidate(interval = 1000, timeout = 30000) {
+        const iceCandidatesKey = `iceCandidates:${socket.id}`
+        let totalTime = 0;
+    
+        return new Promise((resolve, reject) => {
+            const checkList = async () => {
+                try {
+                    const candidates = await client.lRange(iceCandidatesKey, 0, -1);
+                    if (candidates.length > 0) {
+                        resolve(candidates); // Resolve with the candidates
+                    } else if (totalTime < timeout) {
+                        totalTime += interval;
+                        setTimeout(checkList, interval); // Check again after the interval
+                    } else {
+                        reject(new Error('Timeout waiting for candidates'));
+                    }
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            checkList();
+        });
+    }    
+
+    socket.on("answer", async (answer, roomName) => {
         const reciverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
-        socket.to(reciverId).emit("answer", answer);
+
+        const candidateQueue = await waitForAtLeastOneCandidate();
+        const candidate = candidateQueue.map(candidate => JSON.parse(candidate));
+
+        socket.to(reciverId).emit("answer", answer, candidate);
     });
 
     socket.on("send-message", (message, roomId) => {

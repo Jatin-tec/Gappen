@@ -14,8 +14,8 @@ async function initializeChat() {
 
 socket.on('roomJoined', handleRoomJoined)
 
-socket.on('offer', (offer, roomId) => handleOffer(offer, roomId))
-socket.on('answer', (answer, roomId) => handleAnswer(answer, roomId))
+socket.on('offer', (offer, roomId, candidateQueue) => handleOffer(offer, roomId, candidateQueue))
+socket.on('answer', (answer, candidateQueue) => handleAnswer(answer, candidateQueue))
 socket.on('ice-candidate', (candidate) => handleCandidate(candidate))
 
 socket.on('setUsername', handleSetUsername)
