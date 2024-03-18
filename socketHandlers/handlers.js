@@ -29,13 +29,13 @@ function registerSocketEvents(io, socket, client) {
         socket.to(room.answerSocketId).emit("offer", room, roomName);
     });
 
-    socket.on("answer", async (answer, roomName) => {
+    socket.on("answer", async (answer, roomName, ackFunction) => {
         let room = await client.get(roomName);
         room = JSON.parse(room);
         room.answer = answer;
         console.log(room);
         await client.set(roomName, JSON.stringify(room));
-
+        ackFunction(room.offerIceCandidates);
         socket.to(room.offerSocketId).emit("answer", room, roomName);
     });
 

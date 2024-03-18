@@ -35,14 +35,18 @@ const handleOffer = async (offer, roomId) => {
 
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);   
-    
     console.log('Sending answer:', answer);
-    socket.emit('answer', answer, roomId);
+    
+    const offerIceCandidates = await socket.emitWithAck('answer', answer, roomId);        
+    offerIceCandidates.forEach(candidate => {
+        peerConnection.addIceCandidate(candidate)
+        console.log('==========Added candidate===========');
+    });
+
 };
 
 const handleAnswer = async (answer, roomId) => {
     console.log(`Received answer`, answer);
-
     await peerConnection.setRemoteDescription(answer.answer);
 };
 
