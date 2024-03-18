@@ -6,45 +6,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Document</title>
   <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/corner.css" />
 </head>
 
 <body>
   <div class="container">
-    <div id="roomId"></div>
-    <div class="inside">
-      <div class="user2">
-        <div class="videouser2">
-          <div class="user1">
-            <h1 id="localUsername" data-username="<%= userName %>"><%= userName %></h1>
-            <video class="" id="localUser" autoplay playsinline></video>
-          </div>
-          <h2 id="remoteUsername"></h2>
-          <video class="video-player" id="remoteUser" autoplay playsinline></video>
-        </div>
+  <div class="header">
+    <h1>Gappen</h1>
+    <div class="usernames">
+      <div class="usercontainer">
+        <h2>User1</h2>
       </div>
-      <div class="chat">
-        <div class="center">
-          <div class="card">
-            <div class="chat-input">
-            </div>
-          </div>
-
-          <div class="input-card">
-            <label class="input-label"></label>
-            <input type="text" name="" id="messageInput" class="message" maxlength="50" placeholder="Write a message">
-            <button class="send" id="sendMessage">Send</button>
-          </div>
-          <div class="buttons-div">
-            <button class="home">Home</button>
-            <button class="report">Report</button>
-            <button class="skip" id="skipButton">Skip</button>
-          </div>
-        </div>
+      <div class="usercontainer">
+        <h2>User2</h2>
       </div>
     </div>
+  </div>
+  <div class="video">
+    <div class="user">
+      <video class="video-player" id="localUser" autoplay playsinline muted></video>
+    </div>
+    <div class="user">
+      <video class="video-player" id="remoteUser" autoplay playsinline></video>
+    </div>
+    <div class="msgchat">
+      <div class="buttons-div">
+        <button class="btns home">Home</button>
+        <button class="btns report">Report</button>
+        <button class="btns skip" id="skipButton">Skip</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+   
+    </div>
+      <!-- Popup chat window -->
+
+    <!-- chat open -->
+    <div class="chat-bar-open" id="chat-open">
+      <button
+        id="chat-open-button"
+        type="button"
+        class="collapsible close"
+        onclick="chatOpen()"
+      >
+        <img src="../static/Graident Ai Robot.jpg" alt="chat" />
+      </button>
+    </div>
+
+    <!-- chat close -->
+    <div class="chat-bar-close" id="chat-close">
+      <button
+        id="chat-close-button"
+        type="button"
+        class="collapsible close"
+        onclick="chatClose()"
+      >
+        <i class="material-icons-outlined"> X </i>
+      </button>
+    </div>
+
+    <!-- chat-window 1 -->
+    <div class="chat-window" id="chat-window1">
+      <div class="hi-there">
+        <p class="p1">Hi There</p>
+        <br />
+        <p class="p2">Welcome to our portal! We're here to promptly address your  grievances.</p>
+      </div>
+      <div class="start-conversation">
+        <h1>Start a Conversation</h1>
+        <br />
+        <p>Public Grievance Monitoring System.</p>
+        <button
+          class="new-conversation"
+          type="button"
+          onclick="openConversation()"
+        >
+          <span>New Conversation</span
+          ><i class="material-icons-outlined"> send </i>
+        </button>
+      </div>
+    </div>
+
+    <!-- chat chat-window 2 -->
+    <div class="chat-window2" id="chat-window2">
+      <div class="message-box" id="messageBox">
+        <div class="hi-there">
+          <p class="p1">Hi There</p>
+          <br />
+          <p class="p2">Welcome to our portal! We're here to promptly address your grievances.</p>
+        </div>
+        <div class="second-chat">
+          <div class="circle" id="circle-mar">
+             </div>
+          <p class="bot_mssg_box"></p>
+          <div class="arrow"></div>
+        </div>
+      </div>
+      <div class="input-box">
+        <div class="">
+          <!-- <img src="assets/images/sparrow favicon.png" />
+          <p>we run on surveysparrow</p> -->
+        </div>
+        <div class="write-reply">
+          <input
+            class="inputText"
+            type="text"
+            id="textInput"
+            placeholder="Write a reply..."
+          />
+        </div>
+        <div class="send-button">
+          <button
+            type="submit"
+            class="send-message"
+            id="send"
+            onclick=""
+          >
+            <i class=" material-icons-outlined"> send </i>
+          </button>
+        </div>
+      </div>
+      </div>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/static/handlers.js"></script>
 <script src="/static/main.js"></script>
+<script src="/static/corner.js"></script>
 
 </html>
+<!-- <div class="user2">
+  <div class="videouser2">
+    <div class="user1"> -->
+      <!-- <h1 id="localUsername" data-username="<%= userName %>"><%= userName %></h1> -->
+      <!-- <video class="video-player" id="localUser" autoplay playsinline></video>
+    </div> -->
+    <!-- <h2 id="remoteUsername"></h2> -->
+    <!-- 
+  </div>
+</div> -->
+
+<!-- <div class="inside">
+    
+  <div class="chat">
+    <div class="center">
+      <div class="card">
+        <div class="chat-input">
+        </div>
+      </div>
+
+      <div class="input-card">
+        <label class="input-label"></label>
+        <input type="text" name="" id="messageInput" class="message" maxlength="50" placeholder="Write a message">
+        <button class="send" id="sendMessage">Send</button>
+      </div>
+    </div>
+  </div> -->
+
+
+  <!-- <video class="video-player" id="remoteUser" autoplay playsinline></video> -->

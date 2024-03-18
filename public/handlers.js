@@ -56,11 +56,12 @@ skipButton.addEventListener("click", function () {
     resetVideoCall(); // Function to reset or clear the current video call setup
 });
 
-const sendMessageButton = document.getElementById("sendMessage");
+const sendMessageButton = document.getElementById("send");
 sendMessageButton.addEventListener("click", function () {
-    const message = document.getElementById('messageInput').value;
+    const message = document.getElementById('textInput').value;
+    document.getElementById('textInput').value="";
     const roomId = document.getElementById('roomId').innerText;
-    var chats = document.getElementsByClassName("chat-input");
+    var chats = document.getElementsByClassName("send-message");
     chats[0].innerHTML += "<div class=" + "userchat1" + "><p class=" + "user1chat" + ">" + message + "</p>" + '</div><hr>';
     socket.emit("send-message", message, roomId);
 });
