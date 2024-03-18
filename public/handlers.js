@@ -1,9 +1,7 @@
 var localStream = null;
 var remoteStream = null;
 var peerConnection = null;
-var candidateQueue = []; // Queue for storing candidates before the offer/answer is sent
 
-var state_queue = []
 
 const handleRoomJoined = async (roomId) => {
     document.getElementById('roomId').innerText = roomId;
@@ -28,9 +26,9 @@ const handleOffer = async (offer, roomId, candidateQueue) => {
     await peerConnection.setLocalDescription(answer);   
  
     console.log('Candidate queue:', candidateQueue);
-    candidateQueue.forEach(candidate => {
+    candidateQueue.forEach(async (candidate) => {
         console.log('================Adding candidate===========', candidate);
-        peerConnection.addIceCandidate(candidate);
+        await peerConnection.addIceCandidate(candidate);
     });
 
     socket.emit('answer', answer, roomId);
@@ -42,9 +40,9 @@ const handleAnswer = async (answer, candidateQueue) => {
 
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
     
-    candidateQueue.forEach(candidate => {
+    candidateQueue.forEach(async (candidate) => {
         console.log('================Adding candidate===========', candidate);
-        peerConnection.addIceCandidate(candidate);
+        await peerConnection.addIceCandidate(candidate);
     });
 };
 
@@ -89,6 +87,7 @@ function createPeerConnection(roomId, offer) {
         peerConnection.ontrack = event => {
             if (event.streams && event.streams[0]) {
                 console.log('Received remote stream:', event.streams[0]);
+                console.log('peerConnection', peerConnection);
                 document.getElementById('remoteStream').srcObject = event.streams[0];
             }
         };
