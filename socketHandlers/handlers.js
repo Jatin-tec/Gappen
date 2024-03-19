@@ -11,13 +11,14 @@ function registerSocketEvents(io, socket, client) {
 
         if (socket.id === roomData.offerSocketId) {
             roomData.offerIceCandidates.push(candidate);
+            await client.set(roomName, JSON.stringify(roomData));
             socket.to(roomData.answerSocketId).emit("ice-candidate", candidate);
         }
         if (socket.id === roomData.answerSocketId) {
-            roomData.answererIceCandidates.push(candidate);
+            roomData.answerIceCandidates.push(candidate);
+            await client.set(roomName, JSON.stringify(roomData));
             socket.to(roomData.offerSocketId).emit("ice-candidate", candidate);
         }
-        await client.set(roomName, JSON.stringify(roomData));
     });
 
     socket.on("offer", async (offer, roomName) => {
@@ -38,6 +39,12 @@ function registerSocketEvents(io, socket, client) {
         ackFunction(room.offerIceCandidates);
         socket.to(room.offerSocketId).emit("answer", room, roomName);
     });
+
+    socket.on("set-answer-ice", async (roomName, ackFunction) => {
+        let room = await client.get(roomName);
+        room = JSON.parse(room);
+        ackFunction(room.answerIceCandidates);
+    })
 
     socket.on("send-message", (message, roomId) => {
         console.log(`User ${socket.id} sent message: ${message}`);
@@ -153,7 +160,7 @@ async function attemptToMatchUsers(io, queueName, client) {
             answererUserName: user2,
             answer: null,
             answerSocketId: user2.socketId,
-            answererIceCandidates: []
+            answerIceCandidates: []
         }));
     
         const user1Socket = io.sockets.sockets.get(user1.socketId);

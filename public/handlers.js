@@ -40,14 +40,19 @@ const handleOffer = async (offer, roomId) => {
     const offerIceCandidates = await socket.emitWithAck('answer', answer, roomId);        
     offerIceCandidates.forEach(candidate => {
         peerConnection.addIceCandidate(candidate)
-        console.log('==========Added candidate===========');
+        console.log('==========Added candidate Offer===========');
     });
-
 };
 
 const handleAnswer = async (answer, roomId) => {
     console.log(`Received answer`, answer);
     await peerConnection.setRemoteDescription(answer.answer);
+
+    const answerIceCandidates = socket.emitWithAck("set-answer-ice", roomId);
+    answerIceCandidates.forEach(candidate => {
+        peerConnection.addIceCandidate(candidate)
+        console.log('==========Added candidate Answer===========');
+    });
 };
 
 const handleCandidate = async (candidate) => {
@@ -56,17 +61,24 @@ const handleCandidate = async (candidate) => {
 };
 
 function createPeerConnection(roomId=null) {
-    return new Promise((resolve, reject) => {
-        const servers = {
-            iceServers: [
-                {
-                    urls:[
-                        'stun:stun.l.google.com:19302',
-                        'stun:stun1.l.google.com:19302'
-                    ]
-                }
-            ],
-        };
+    return new Promise(async (resolve, reject) => {
+        
+        const servers = await fetch("/api/v1/turn/credentials?apiKey=<YOUR_API_KEY>").json();
+        
+        // const servers = {
+        //     iceServers: [
+        //         {
+        //             urls:[
+        //                 'stun:stun.l.google.com:19302',
+        //             ]
+        //         },
+        //         {
+        //             urls: ['turn:gappen.metered.live:80?transport=udp'],
+        //             username: 'YourUsername', // Replace 'YourUsername' with your TURN server username
+        //             credential: 'YourPassword' // Replace 'YourPassword' with your TURN server credential
+        //         }
+        //     ],
+        // };
         peerConnection = new RTCPeerConnection(servers);
         
         // Add tracks from the local stream to the peer connection
@@ -114,10 +126,6 @@ sendMessageButton.addEventListener("click", function () {
     socket.emit("send-message", message, roomId);
 });
 
-const handleSetUsername = (username) => {
-    console.log(`Your username is: ${username}`);
-    document.getElementById('remoteUsername').innerText = username;
-}
 
 const handleReceiveMessage = (message) => {
     console.log(`Received message: ${message}`);
