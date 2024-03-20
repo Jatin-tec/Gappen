@@ -64,8 +64,9 @@ function createPeerConnection(roomId=null) {
     return new Promise(async (resolve, reject) => {
         
         const response = await fetch("https://gappen.metered.live/api/v1/turn/credentials?apiKey=ade90811dead8f8c262650df276cd42c39eb");
+        const json = await response.json();
         const servers = {
-            iceServers: await response.json()
+            iceServers: json.slice(0, 3)
         };
 
         peerConnection = new RTCPeerConnection(servers);
