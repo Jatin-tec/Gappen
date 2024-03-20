@@ -63,22 +63,11 @@ const handleCandidate = async (candidate) => {
 function createPeerConnection(roomId=null) {
     return new Promise(async (resolve, reject) => {
         
-        const servers = await fetch("/api/v1/turn/credentials?apiKey=<YOUR_API_KEY>").json();
-        
-        // const servers = {
-        //     iceServers: [
-        //         {
-        //             urls:[
-        //                 'stun:stun.l.google.com:19302',
-        //             ]
-        //         },
-        //         {
-        //             urls: ['turn:gappen.metered.live:80?transport=udp'],
-        //             username: 'YourUsername', // Replace 'YourUsername' with your TURN server username
-        //             credential: 'YourPassword' // Replace 'YourPassword' with your TURN server credential
-        //         }
-        //     ],
-        // };
+        const response = await fetch("https://gappen.metered.live/api/v1/turn/credentials?apiKey=ade90811dead8f8c262650df276cd42c39eb");
+        const servers = {
+            iceServers: await response.json()
+        };
+
         peerConnection = new RTCPeerConnection(servers);
         
         // Add tracks from the local stream to the peer connection
