@@ -25,7 +25,6 @@ function registerSocketEvents(io, socket, client) {
         let room = await client.get(roomName);
         room = JSON.parse(room);
         room.offer = offer;
-        console.log(room);
         await client.set(roomName, JSON.stringify(room));
         socket.to(room.answerSocketId).emit("offer", room, roomName);
     });
@@ -34,7 +33,6 @@ function registerSocketEvents(io, socket, client) {
         let room = await client.get(roomName);
         room = JSON.parse(room);
         room.answer = answer;
-        console.log(room);
         await client.set(roomName, JSON.stringify(room));
         ackFunction(room.offerIceCandidates);
         socket.to(room.offerSocketId).emit("answer", room, roomName);
@@ -169,8 +167,6 @@ async function attemptToMatchUsers(io, queueName, client) {
         if (user1Socket && user2Socket) {
             user1Socket.join(roomName);
             user2Socket.join(roomName);
-
-            console.log(`Matched ${user1.userName} with ${user2.userName} in room ${roomName}`);
             user2Socket.emit("create-pear", user1.userName, roomName);
             user1Socket.emit("create-offer", user2.userName, roomName);
         }
