@@ -1,176 +1,179 @@
-function registerSocketEvents(io, socket, client) {
-    socket.on("join", (userName) => {
-        const queueName = Math.random() < 0.5 ? 'waitingUsersA' : 'waitingUsersB';
-        addUserToWaitingList(socket, queueName, userName, client);
-        attemptToMatchUsers(io, queueName, client);
-    });
+const redisUtils = {
+    async addUserToQueue(client, queueName, userName, socketId) {
+        const userData = JSON.stringify({ userName, socketId });
+        await client.sAdd(queueName, userData);
+        const waitingUsersCount = await client.sCard(queueName);
+        console.log(`User ${socketId} added to ${queueName}. Waiting users: ${waitingUsersCount}`);
+    },
 
-    socket.on("ice-candidate", async (candidate, roomName) => {
-        const room = await client.get(roomName);
-        const roomData = JSON.parse(room);
+    async createRoomForUsers(client, user1Data, user2Data) {
+        const roomName = `room-${user1Data.socketId}-${user2Data.socketId}`;
+        const roomData = {
+            offerer: user1Data,
+            answerer: user2Data,
+            offer: null,
+            offerIceCandidates: [],
+            answer: null,
+            answerIceCandidates: [],
+        };
+        await client.set(roomName, JSON.stringify(roomData));
+        await client.set(user1Data.socketId, JSON.stringify({ roomName, userName: user1Data.userName }));
+        await client.set(user2Data.socketId, JSON.stringify({ roomName, userName: user2Data.userName }));
+        return { roomName, roomData };
+    },
 
-        if (socket.id === roomData.offerSocketId) {
-            roomData.offerIceCandidates.push(candidate);
-            await client.set(roomName, JSON.stringify(roomData));
-            socket.to(roomData.answerSocketId).emit("ice-candidate", candidate);
-        }
-        if (socket.id === roomData.answerSocketId) {
-            roomData.answerIceCandidates.push(candidate);
-            await client.set(roomName, JSON.stringify(roomData));
-            socket.to(roomData.offerSocketId).emit("ice-candidate", candidate);
-        }
-    });
+    async matchUsersFromQueue(client, io, queueName) {
+        while (await client.sCard(queueName) >= 2) {
+            let [user1Data, user2Data] = await Promise.all([client.sPop(queueName), client.sPop(queueName)]);
+            user1Data = JSON.parse(user1Data);
+            user2Data = JSON.parse(user2Data);
 
-    socket.on("offer", async (offer, roomName) => {
-        let room = await client.get(roomName);
-        room = JSON.parse(room);
-        room.offer = offer;
-        await client.set(roomName, JSON.stringify(room));
-        socket.to(room.answerSocketId).emit("offer", room, roomName);
-    });
+            const { roomName } = await this.createRoomForUsers(client, user1Data, user2Data);
+            const user1Socket = io.sockets.sockets.get(user1Data.socketId);
+            const user2Socket = io.sockets.sockets.get(user2Data.socketId);
 
-    socket.on("answer", async (answer, roomName, ackFunction) => {
-        let room = await client.get(roomName);
-        room = JSON.parse(room);
-        room.answer = answer;
-        await client.set(roomName, JSON.stringify(room));
-        ackFunction(room.offerIceCandidates);
-        socket.to(room.offerSocketId).emit("answer", room, roomName);
-    });
-
-    socket.on("set-answer-ice", async (roomName, ackFunction) => {
-        let room = await client.get(roomName);
-        room = JSON.parse(room);
-        ackFunction(room.answerIceCandidates);
-    })
-
-    socket.on("send-message", (message, roomId) => {
-        console.log(`User ${socket.id} sent message: ${message}`);
-        const reciverId = roomId.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
-        console.log(`Sending message to ${reciverId}`);
-        socket.to(reciverId).emit("receive-message", message);
-    });
-
-    socket.on("skip", async () => {
-        const oldRoom = await client.get(`room:${socket.id}`);
-        console.log(`Old room: ${oldRoom}`);
-        if (oldRoom) {
-            socket.leave(oldRoom);
-            io.to(oldRoom).emit("userSkipped", socket.id); // Notify the other user
-
-            // Determine the other user in the room
-            const otherSocketId = oldRoom.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
-            const otherSocket = io.sockets.sockets.get(otherSocketId);
-
-            // Remove users from their current queues and rooms
-            await client.sRem('waitingUsersA', socket.id);
-            await client.sRem('waitingUsersB', socket.id);
-            await client.del(`room:${socket.id}`);
-
-            if (otherSocket) {
-                await client.del(`room:${otherSocketId}`);
-                
-                const userName = await client.get(`user:${socket.id}`);
-                const otherUserName = await client.get(`user:${otherSocketId}`);
-                // Re-add users to the waiting lists for a new match
-                await addUserToWaitingList(socket, 'waitingUsersA', userName, client);
-                await addUserToWaitingList(otherSocket, 'waitingUsersB', otherUserName, client);
-
-                // Attempt to match both users in their respective new queues
-                attemptToMatchUsers(io, 'waitingUsersB', client);
+            if (user1Socket && user2Socket) {
+                user1Socket.join(roomName);
+                user2Socket.join(roomName);
+                user2Socket.emit("create-peer", user1Data.userName, roomName);
+                user1Socket.emit("create-offer", user2Data.userName, roomName);
             }
-            attemptToMatchUsers(io, 'waitingUsersA', client);
         }
-    });
+    },
 
-    socket.on("disconnect", async () => {
-        console.log(`User disconnected: ${socket.id}`);
-
-        async function removeUserFromWaitingList(queueName) {
+    async removeUserFromWaitingLists(client, socketId) {
+        const queues = ['waitingUsersA', 'waitingUsersB'];
+        for (const queueName of queues) {
             const members = await client.sMembers(queueName);
             for (const member of members) {
                 const data = JSON.parse(member);
-                if (data.socketId === socket.id) {
+                if (data.socketId === socketId) {
                     await client.sRem(queueName, member);
-                    return true; // User was found and removed
+                    console.log(`Removed user ${socketId} from ${queueName}`);
+                    return; // Assuming a user can only be in one queue at a time
                 }
             }
-            return false; // User was not found in this queue
         }
-    
-        const wasInQueueA = await removeUserFromWaitingList('waitingUsersA');
-        const wasInQueueB = await removeUserFromWaitingList('waitingUsersB');
-        const oldRoom = await client.get(`room:${socket.id}`);
+    }
+};
 
-        if (oldRoom) {
-            const otherSocketId = oldRoom.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace('room-' , '');
+function registerSocketEvents(io, socket, client) {
+    socket.on("join", userName => {
+        const queueName = Math.random() < 0.5 ? 'waitingUsersA' : 'waitingUsersB';
+        redisUtils.addUserToQueue(client, queueName, userName, socket.id);
+        redisUtils.matchUsersFromQueue(client, io, queueName);
+    });
+
+    // Handle ICE candidates
+    socket.on("ice-candidate", async (candidate, roomName) => {
+        const roomData = JSON.parse(await client.get(roomName));
+        const targetSocketId = socket.id === roomData.offerer.socketId ? roomData.answerer.socketId : roomData.offerer.socketId;
+        roomData[socket.id === roomData.offerer.socketId ? "offerIceCandidates" : "answerIceCandidates"].push(candidate);
+        await client.set(roomName, JSON.stringify(roomData));
+        socket.to(targetSocketId).emit("ice-candidate", candidate);
+    });
+
+    // Offer and Answer handlers simplified with an example of the offer handler
+    socket.on("offer", async (offer, roomName) => handleSessionDescription(offer, roomName, 'offer', client, socket));
+
+    socket.on("answer", async (answer, roomName, ackFunction) => handleSessionDescription(answer, roomName, 'answer', client, socket, ackFunction));
+
+    socket.on("send-message", (message, roomName) => {
+        // Extract the receiver's ID from the room name based on who sent the message
+        const receiverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '');
+        socket.to(receiverId).emit("receive-message", message);
+    });
+
+    socket.on("skip", async () => {
+        const userObj = JSON.parse(await client.get(socket.id));
+        if (!userObj) return; // Early return if user data is not found
+
+        const oldRoomName = userObj.roomName;
+        console.log(`Old room: ${oldRoomName}`);
+
+        if (oldRoomName) {
+            socket.leave(oldRoomName);
+            io.to(oldRoomName).emit("userSkipped", socket.id); // Notify the other user in the room
+
+            // Clean up Redis entries for the room and the skipping user
+            await client.del(socket.id);
+            await client.del(oldRoomName);
+
+            // Extract the ID of the other user in the room
+            const otherSocketId = oldRoomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '');
             const otherSocket = io.sockets.sockets.get(otherSocketId);
-            const userName = await client.get(`user:${socket.id}`);
+
+            // Re-add both users to waiting lists for a new match
+            const queueNameForCurrentUser = Math.random() < 0.5 ? 'waitingUsersA' : 'waitingUsersB';
+            redisUtils.addUserToQueue(client, queueNameForCurrentUser, userObj.userName, socket.id);
+            redisUtils.matchUsersFromQueue(client, io, queueNameForCurrentUser);
+
             if (otherSocket) {
-                otherSocket.leave(oldRoom);
-                // Notify the other user in the room that their partner has disconnected
-                io.to(otherSocket.id).emit("partnerDisconnected");
-                // Optionally, move the remaining user to a waiting list for re-matching
-                const newQueue = wasInQueueA ? 'waitingUsersB' : 'waitingUsersA'; // Switch queue if the user was in one
-                await addUserToWaitingList(otherSocket, newQueue, userName, client);
-                attemptToMatchUsers(io, newQueue, client);
+                // Handle the other user similarly: clean up and re-queue for matching
+                const otherUserObj = JSON.parse(await client.get(otherSocketId));
+                await client.del(otherSocketId); // Clean up Redis entry for the other user
+
+                const queueNameForOtherUser = queueNameForCurrentUser === 'waitingUsersA' ? 'waitingUsersB' : 'waitingUsersA';
+                if (otherUserObj && otherUserObj.userName) {
+                    redisUtils.addUserToQueue(client, queueNameForOtherUser, otherUserObj.userName, otherSocketId);
+                    redisUtils.matchUsersFromQueue(client, io, queueNameForOtherUser);
+                }
             }
-            // Clean up room mappings
-            await client.del(`room:${socket.id}`);
-            await client.del(`username:${socket.id}`);
-            if (otherSocketId) {
-                await client.del(`room:${otherSocketId}`);
+        }
+    });
+
+    // Disconnect event handler
+    socket.on("disconnect", async () => {
+        console.log(`User disconnected: ${socket.id}`);
+
+        const userObjStr = await client.get(socket.id);
+        if (!userObjStr) {
+            console.log(`No user object found for socket ID: ${socket.id}`);
+            return;
+        }
+        const userObj = JSON.parse(userObjStr);
+        const oldRoomName = userObj.roomName;
+
+        console.log(`Old room: ${oldRoomName}`);
+
+        // Remove the user from the waiting list, if present
+        await redisUtils.removeUserFromWaitingLists(client, socket.id);
+
+        // If the user was in a room, handle additional cleanup
+        if (oldRoomName) {
+            // Notify the other user in the room that their partner has disconnected
+            const otherSocketId = oldRoomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '');
+            io.to(otherSocketId).emit("partnerDisconnected");
+
+            const otherSocket = io.sockets.sockets.get(otherSocketId);
+            if (otherSocket) {
+                otherSocket.leave(oldRoomName);
+                // Optionally, re-add the remaining user to a waiting list for a new match
+                const otherUserObjStr = await client.get(otherSocketId);
+                if (otherUserObjStr) {
+                    const otherUserObj = JSON.parse(otherUserObjStr);
+                    const queueNameForOtherUser = Math.random() < 0.5 ? 'waitingUsersA' : 'waitingUsersB';
+                    redisUtils.addUserToQueue(client, queueNameForOtherUser, otherUserObj.userName, otherSocketId);
+                    redisUtils.matchUsersFromQueue(client, io, queueNameForOtherUser);
+                }
             }
+
+            // Clean up room and user entries in Redis
+            await client.del(oldRoomName);
         }
 
-        // Attempt to match users in the remaining queue
-        const queueToMatch = wasInQueueA > 0 ? 'waitingUsersA' : 'waitingUsersB';
-        if (wasInQueueA > 0 || wasInQueueB > 0) {
-            attemptToMatchUsers(io, queueToMatch, client);
-        }
+        // Finally, remove the disconnecting user's Redis entry
+        await client.del(socket.id);
     });
 }
 
-async function addUserToWaitingList(socket, queueName, userName, client) {
-
-    await client.sAdd(queueName, JSON.stringify({"userName": userName, "socketId": socket.id}));
-    const waitingUsers = await client.sCard(queueName);
-
-    console.log(`User ${socket.id} added to waiting list ${queueName}. Waiting users: ${waitingUsers}`);
-}
-
-async function attemptToMatchUsers(io, queueName, client) {
-    while (await client.sCard(queueName) >= 2) {
-
-        let user1 = await client.sPop(queueName);
-        let user2 = await client.sPop(queueName);
-
-        user1 = JSON.parse(user1);
-        user2 = JSON.parse(user2);
-
-        const roomName = `room-${user1.socketId}-${user2.socketId}`;
-
-        await client.set(roomName, JSON.stringify({
-            offererUserName: user1,
-            offer: null,
-            offerSocketId: user1.socketId,
-            offerIceCandidates: [],
-            answererUserName: user2,
-            answer: null,
-            answerSocketId: user2.socketId,
-            answerIceCandidates: []
-        }));
-    
-        const user1Socket = io.sockets.sockets.get(user1.socketId);
-        const user2Socket = io.sockets.sockets.get(user2.socketId);
-
-        if (user1Socket && user2Socket) {
-            user1Socket.join(roomName);
-            user2Socket.join(roomName);
-            user2Socket.emit("create-pear", user1.userName, roomName);
-            user1Socket.emit("create-offer", user2.userName, roomName);
-        }
-    }
+async function handleSessionDescription(description, roomName, type, client, socket, ackFunction = null) {
+    let room = JSON.parse(await client.get(roomName));
+    room[type] = description;
+    await client.set(roomName, JSON.stringify(room));
+    const targetSocketId = type === 'offer' ? room.answerer.socketId : room.offerer.socketId;
+    if (ackFunction) ackFunction(room[`${type}IceCandidates`]);
+    socket.to(targetSocketId).emit(type, description, roomName);
 }
 
 module.exports = { registerSocketEvents };

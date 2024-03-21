@@ -24,7 +24,7 @@ const handleOffer = async (offer, roomId) => {
 
     const answer = await peerConnection.createAnswer();
     await peerConnection.setLocalDescription(answer);
-    const offerIceCandidates = await socket.emitWithAck('answer', answer, roomId);        
+    const offerIceCandidates = await socket.emitWithAck('answer', answer, roomId);
     offerIceCandidates.forEach(candidate => {
         peerConnection.addIceCandidate(candidate)
     });
@@ -43,9 +43,9 @@ const handleCandidate = async (candidate) => {
     peerConnection.addIceCandidate(candidate);
 };
 
-function createPeerConnection(roomId=null) {
+function createPeerConnection(roomId = null) {
     return new Promise(async (resolve, reject) => {
-        
+
         const response = await fetch("https://gappen.metered.live/api/v1/turn/credentials?apiKey=ade90811dead8f8c262650df276cd42c39eb");
         const json = await response.json();
         const servers = {
@@ -53,10 +53,10 @@ function createPeerConnection(roomId=null) {
         };
 
         peerConnection = new RTCPeerConnection(servers);
-        
+
         // Add tracks from the local stream to the peer connection
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-        
+
         // Listen for negotiationneeded event
         // peerConnection.addEventListener("signalingstatechange", (event) => {
         //     console.log('signaling state event', event);
@@ -86,22 +86,6 @@ skipButton.addEventListener("click", function () {
     resetVideoCall(); // Function to reset or clear the current video call setup
 });
 
-const sendMessageButton = document.getElementById("send");
-sendMessageButton.addEventListener("click", function () {
-    const message = document.getElementById('textInput').value;
-    document.getElementById('textInput').value="";
-    const roomId = document.getElementById('roomId').innerText;
-    var chats = document.getElementsByClassName("send-message");
-    chats[0].innerHTML += "<div class=" + "userchat1" + "><p class=" + "user1chat" + ">" + message + "</p>" + '</div><hr>';
-    socket.emit("send-message", message, roomId);
-});
-
-
-const handleReceiveMessage = (message) => {
-    var chats = document.getElementsByClassName("chat-input");
-    chats[0].innerHTML += "<div class=" + "userchat2" + "><p class=" + "user2chat" + ">" + message + "</p>" + '</div><hr>';
-}
-
 const handleSkip = () => {
     resetVideoCall(); // Handle resetting the call on the other user's end as well
 };
@@ -114,9 +98,11 @@ function resetVideoCall() {
     }
     // Optionally, clear the remote video display or show a message
     document.getElementById('remoteStream').srcObject = null;
-    socket.emit('join');
+    document.getElementById('roomId').innerText = 'Gapen';
+    document.getElementById('remoteUsername').innerText = 'User';
 }
 
 const handlePartnerDisconnected = () => {
+    console.log('Partner disconnected');
     resetVideoCall(); // Handle resetting the call on the other user's end as well
 };
