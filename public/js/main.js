@@ -72,6 +72,7 @@ socket.on('ice-candidate', candidate => {
 });
 
 socket.on('userSkipped', resetVideoCall);
+
 socket.on('partnerDisconnected', () => {
     console.log('Partner disconnected');
     resetVideoCall();
