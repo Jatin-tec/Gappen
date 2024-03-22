@@ -162,7 +162,7 @@ function registerSocketEvents(io, socket, client) {
             await client.del(oldRoomName);
         }
 
-        // Finally, remove the disconnecting user's Redis entry
+        // Removing the disconnecting user's Redis entry
         await client.del(socket.id);
     });
 }
