@@ -3,6 +3,7 @@ const socket = io();
 
 var localStream = null;
 var peerConnection = null;
+var roomName = null;
 
 async function initializeChat() {
     try {
@@ -33,12 +34,38 @@ async function createPeerConnection(roomId) {
 }
 
 function updateRemoteStream(stream) {
+    if (stream) {
+        document.getElementById('loader').style.display = 'none';
+    }
     document.getElementById('remoteStream').srcObject = stream;
 }
 
 function updateUIForCall(remoteUsername, roomId) {
+    roomName = roomId;
     document.getElementById('remoteUsername').innerText = remoteUsername;
 }
+
+function userResponse() {
+    const userText = document.getElementById("textInput").value;
+    if (userText == "" || roomName == null) {
+    } else {
+        const objDiv = document.getElementById("chat-body");
+
+        objDiv.innerHTML += `<div class="chat-send">
+        <p>${userText}</p>
+        </div>`
+        document.getElementById("textInput").value = "";
+        socket.emit("send-message", userText, roomName);
+    }
+}
+
+socket.on("receive-message", (response) => {
+    const objDiv = document.getElementById("chat-body");
+    objDiv.innerHTML += `<div class="chat-receive">
+    <p>${response}</p>
+    </div>`
+});
+
 
 // Socket event listeners
 socket.on('create-offer', async (remoteUsername, roomId) => {
@@ -91,5 +118,16 @@ function resetVideoCall() {
     updateRemoteStream(null);
     updateUIForCall('User', 'Gapen');
 }
+
+// mic toggle
+const changeText = document.querySelector("#mute");
+
+changeText.addEventListener("click", function () {
+  if (changeText.textContent === "mic_off") {
+    changeText.textContent = "mic";
+} else {
+    changeText.textContent = "mic_off";
+  }
+});
 
 initializeChat();

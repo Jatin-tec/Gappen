@@ -38,6 +38,8 @@ const redisUtils = {
                 user2Socket.emit("create-peer", user1Data.userName, roomName);
                 user1Socket.emit("create-offer", user2Data.userName, roomName);
             }
+
+            console.log(`Matched users ${user1Data.socketId} and ${user2Data.socketId} in room ${roomName}`);
         }
     },
 
@@ -79,8 +81,9 @@ function registerSocketEvents(io, socket, client) {
     socket.on("answer", async (answer, roomName, ackFunction) => handleSessionDescription(answer, roomName, 'answer', client, socket, ackFunction));
 
     socket.on("send-message", (message, roomName) => {
-        // Extract the receiver's ID from the room name based on who sent the message
+        console.log(`Message from ${socket.id} in room ${roomName}: ${message}`);
         const receiverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '');
+        console.log(`Sending message to ${receiverId}`);
         socket.to(receiverId).emit("receive-message", message);
     });
 
