@@ -11,9 +11,6 @@ const TURN_CREDENTIAL = process.env.TURN_CREDENTIAL
 router.get('/get-servers', (req, res, next) => {
     res.json([
         {
-            "urls": "stun:stun.l.google.com:19302"
-        },
-        {
             "urls": "stun:stun1.l.google.com:19302"
         },
         {
