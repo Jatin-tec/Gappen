@@ -18,8 +18,7 @@ async function initializeChat() {
 
 async function createPeerConnection(roomId) {
     const response = await fetch("/api/get-servers");
-    const json = await response.json();
-    const config = { iceServers: json.slice(0, 2) };
+    const config = { iceServers: await response.json() };
 
     peerConnection = new RTCPeerConnection(config);
     localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
