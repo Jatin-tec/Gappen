@@ -13,6 +13,7 @@ const io = socketIO(server);
 // Import routes
 const homeRouter = require('./routes/home')
 const callRouter = require('./routes/call')
+const apiRouter = require('./routes/api')
 
 // Import socket event handlers
 const { registerSocketEvents } = require('./socketHandlers/handlers');
@@ -42,6 +43,7 @@ app.use('/static', express.static(path.join(__dirname, 'public')))
 
 app.use('/', homeRouter);
 app.use('/room', callRouter);
+app.use('/api', apiRouter);
 
 io.on('connection', (socket) => {
   console.log(`User connected: ${socket.id}`);
