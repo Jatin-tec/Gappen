@@ -57,3 +57,14 @@ const handleReceiveMessage = (response) => {
   audio3.play();
   objDiv.scrollTop = objDiv.scrollHeight;
 }
+
+// mic toggle
+const changeText = document.querySelector("#mute");
+
+        changeText.addEventListener("click", function() {
+          if (changeText.textContent === "mic_off") {
+            changeText.textContent = "mic";
+          } else {
+            changeText.textContent = "mic_off";
+          }
+        });

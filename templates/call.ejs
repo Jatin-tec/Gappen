@@ -29,29 +29,27 @@
       </button> 
     </div>
   </div>  
-  <div class="header">
-    <p id="roomId">Room ID</p>
-  </div>
   <div class="vid-chat">
-   <div class="video">
-     <div class="user">
-       <video class="video-player" id="remoteStream" autoplay playsinline></video>
+    <div class="user1">
+      <video class="video-player" id="remoteStream" autoplay playsinline></video>
+      <div class="overlay">
+        <p id="remoteUsername">
+         <div class="loader"></div>
+        </p>
+        <span class="material-symbols-outlined">
+        <p class="mute" id="mute">mic_off</p>
+        </span>
+      </div>
+     </div>
+     <div class="user2">
+       <video class="video-player" id="localStream" autoplay playsinline muted></video>
        <div class="overlay">
-         <p id="remoteUsername">
-           Connecting...
+         <p id="localUsername" data-username="<%= userName %>">
+           You
          </p>
+         <img src="static/img/logo.png">
        </div>
-      </div>
-      <div class="user">
-        <video class="video-player" id="localStream" autoplay playsinline muted></video>
-        <div class="overlay">
-          <p id="localUsername" data-username="<%= userName %>">
-            You
-          </p>
-          <img src="static/img/logo.png">
-        </div>
-      </div>
-  </div>
+     </div>
   <!-- Chat box start -->
   <div class="chat">
     <div class="chat-header">
