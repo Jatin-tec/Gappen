@@ -37,12 +37,12 @@ function updateRemoteStream(stream) {
 }
 
 function updateUIForCall(remoteUsername, roomId) {
-    document.getElementById('roomId').innerText = roomId;
     document.getElementById('remoteUsername').innerText = remoteUsername;
 }
 
 // Socket event listeners
 socket.on('create-offer', async (remoteUsername, roomId) => {
+    console.log('Create offer');
     updateUIForCall(remoteUsername, roomId);
     await createPeerConnection(roomId);
     const offer = await peerConnection.createOffer();
@@ -51,6 +51,7 @@ socket.on('create-offer', async (remoteUsername, roomId) => {
 });
 
 socket.on('create-peer', async (remoteUsername, roomId) => {
+    console.log('Create peer');
     updateUIForCall(remoteUsername, roomId);
     await createPeerConnection(roomId);
 });
