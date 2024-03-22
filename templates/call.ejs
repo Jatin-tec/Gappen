@@ -1,75 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Document</title>
-  <link rel="stylesheet" href="/static/css/style.css" />
-  <link rel="stylesheet" href="/static/css/chat.css" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Gappen Hojayein!</title>
+  <link rel="icon" type="image/png" href="static/img/favicon.png" />
+  <link href="static/css/chat.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20,300,1,0" />
 </head>
 
 <body>
-  <div class="container">
-    <div class="header">
-      <h1 id="roomId">Gappen</h1>
-      <div class="usernames">
-        <div class="usercontainer">
-          <h2 id="localUsername" data-username="<%= userName %>">
-            <%= userName %>
-          </h2>
-        </div>
-        <div class="usercontainer">
-          <h2 id="remoteUsername">User2</h2>
-        </div>
-      </div>
+  <div class="navbar">
+    <img src="static/img/logo.png" class="logo">
+    <!-- <button class="btn-nav">Gender</button> -->
+    <div class="nav-right">
+      <button class="btn-nav">
+        <span class="material-symbols-outlined">
+        home
+        </span>
+        <span>Home</span>
+      </button>
+      <button class="btn-nav">
+        <span class="material-symbols-outlined">
+        security
+        </span>
+        <span>Secure</span>
+      </button> 
     </div>
-    <div class="video">
+  </div>  
+  <div class="header">
+    <p id="roomId">Room ID</p>
+  </div>
+  <div class="vid-chat">
+   <div class="video">
+     <div class="user">
+       <video class="video-player" id="remoteStream" autoplay playsinline></video>
+       <div class="overlay">
+         <p id="remoteUsername">
+           Connecting...
+         </p>
+       </div>
+      </div>
       <div class="user">
         <video class="video-player" id="localStream" autoplay playsinline muted></video>
-      </div>
-      <div class="user">
-        <video class="video-player" id="remoteStream" autoplay playsinline></video>
-      </div>
-      <div class="msgchat">
-        <div class="buttons-div">
-          <button class="btns home">Home</button>
-          <button class="btns report">Report</button>
-          <button class="btns skip" id="skipButton">Skip</button>
+        <div class="overlay">
+          <p id="localUsername" data-username="<%= userName %>">
+            You
+          </p>
+          <img src="static/img/logo.png">
         </div>
       </div>
-    </div>
   </div>
-  <!-- Popup chat window -->
-  <!-- chat open -->
-  <div class="chat-bar-open" id="chat-open">
-    <button id="chat-open-button" type="button" class="collapsible close" onclick="chatOpen()">
-      <img src="../static/Graident Ai Robot.jpg" alt="chat" />
-    </button>
-  </div>
-  <!-- chat close -->
-  <div class="chat-bar-close" id="chat-close">
-    <button id="chat-close-button" type="button" class="collapsible close" onclick="chatClose()">
-      <i class="material-icons-outlined"> X </i>
-    </button>
-  </div>
-  <!-- chat chat-window -->
-  <div class="chat-window2" id="chat-window2">
-    <div class="message-box" id="messageBox">
-    </div>
-    <div class="input-box">
-      <div class="write-reply">
-        <input class="inputText" type="text" id="textInput" placeholder="Write a reply..." />
+  <!-- Chat box start -->
+  <div class="chat">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <h2>Chat</h2> 
+        <div class="live-pulse"></div> 
       </div>
-      <div class="send-button">
-        <button type="submit" class="send-message" id="send" onclick="userResponse()">
-          <i class="material-icons-outlined">send</i>
+      <button class="btn-report">
+        <span class="material-symbols-outlined">
+        report
+        </span>
+        Report!  
+      </button>
+    </div>
+    
+    <div class="chat-body">
+      <div class="chat-send">
+        <p>Hello. How are you today?</p>
+      </div>
+
+      <div class="chat-receive">
+        <p>Hey! I'm fine. Thanks for asking!</p>
+      </div>
+    </div> 
+
+    <div class="chat-bottom">  
+      <button class="btn-next" id="skipButton">Next</button>
+      
+      <div class="chat-msg-container">
+        <input type="text" class="input-field" name="message" placeholder="Type a message...">
+        <button class="btn-send">
+          Send <span class="material-symbols-outlined">send</span>
         </button>
       </div>
     </div>
   </div>
+  </div>  
 </body>
-<script src="/socket.io/socket.io.js"></script>
-<script src="/static/js/main.js"></script>
-<script src="/static/js/chat.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/static/js/main.js"></script>
+  <script src="/static/js/chat.js"></script>
 </html>
+
+
+<!-- <div class="loader"></div>  -->
+    
