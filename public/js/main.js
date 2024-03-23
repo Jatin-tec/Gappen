@@ -124,9 +124,9 @@ function resetVideoCall() {
 const changeText = document.querySelector("#mute");
 
 changeText.addEventListener("click", function () {
-    const remoteStream = document.getElementById("remoteStream");
+    const remoteStream = document.getElementById("remoteStream").srcObject;
     if (!remoteStream) return;
-    const audioTracks = remoteStream.srcObject.getAudioTracks();
+    const audioTracks = remoteStream.getAudioTracks();
     if (!audioTracks) return;
     const audioTrack = audioTracks[0];
     if (!audioTrack) return;

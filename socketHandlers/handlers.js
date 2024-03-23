@@ -1,3 +1,6 @@
+const waitingUsersA = 'waitingUsersA';
+const waitingUsersB = 'waitingUsersB';
+
 const redisUtils = {
     async addUserToQueue(client, queueName, userName, socketId) {
         const userData = JSON.stringify({ userName, socketId });
@@ -44,10 +47,11 @@ const redisUtils = {
     },
 
     async removeUserFromWaitingLists(client, socketId) {
-        const queues = ['waitingUsersA', 'waitingUsersB'];
+        const queues = [waitingUsersA, waitingUsersB];
         for (const queueName of queues) {
             const members = await client.sMembers(queueName);
             for (const member of members) {
+                console.log(`Checking member: ${member}`);
                 const data = JSON.parse(member);
                 if (data.socketId === socketId) {
                     await client.sRem(queueName, member);
@@ -61,7 +65,7 @@ const redisUtils = {
 
 function registerSocketEvents(io, socket, client) {
     socket.on("join", userName => {
-        const queueName = Math.random() < 0.5 ? 'waitingUsersA' : 'waitingUsersB';
+        const queueName = Math.random() < 0.5 ? waitingUsersA : waitingUsersB;
         redisUtils.addUserToQueue(client, queueName, userName, socket.id);
         redisUtils.matchUsersFromQueue(client, io, queueName);
     });
@@ -90,7 +94,7 @@ function registerSocketEvents(io, socket, client) {
 
     socket.on("send-message", (message, roomName) => {
         console.log(`Message from ${socket.id} in room ${roomName}: ${message}`);
-        const receiverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '');
+        const receiverId = roomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace(`room-`, '');
         console.log(`Sending message to ${receiverId}`);
         socket.to(receiverId).emit("receive-message", message);
     });
@@ -115,7 +119,7 @@ function registerSocketEvents(io, socket, client) {
             const otherSocket = io.sockets.sockets.get(otherSocketId);
 
             // Re-add both users to waiting lists for a new match
-            const queueNameForCurrentUser = Math.random() < 0.5 ? 'waitingUsersA' : 'waitingUsersB';
+            const queueNameForCurrentUser = Math.random() < 0.5 ? waitingUsersA : waitingUsersB;
             redisUtils.addUserToQueue(client, queueNameForCurrentUser, userObj.userName, socket.id);
             redisUtils.matchUsersFromQueue(client, io, queueNameForCurrentUser);
 
@@ -124,7 +128,7 @@ function registerSocketEvents(io, socket, client) {
                 const otherUserObj = JSON.parse(await client.get(otherSocketId));
                 await client.del(otherSocketId); // Clean up Redis entry for the other user
 
-                const queueNameForOtherUser = queueNameForCurrentUser === 'waitingUsersA' ? 'waitingUsersB' : 'waitingUsersA';
+                const queueNameForOtherUser = queueNameForCurrentUser === waitingUsersA ? waitingUsersB : waitingUsersA;
                 if (otherUserObj && otherUserObj.userName) {
                     redisUtils.addUserToQueue(client, queueNameForOtherUser, otherUserObj.userName, otherSocketId);
                     redisUtils.matchUsersFromQueue(client, io, queueNameForOtherUser);
@@ -137,6 +141,9 @@ function registerSocketEvents(io, socket, client) {
     socket.on("disconnect", async () => {
         console.log(`User disconnected: ${socket.id}`);
 
+        // Remove the user from the waiting list, if present
+        await redisUtils.removeUserFromWaitingLists(client, socket.id);
+
         const userObjStr = await client.get(socket.id);
         if (!userObjStr) {
             console.log(`No user object found for socket ID: ${socket.id}`);
@@ -146,9 +153,6 @@ function registerSocketEvents(io, socket, client) {
         const oldRoomName = userObj.roomName;
 
         console.log(`Old room: ${oldRoomName}`);
-
-        // Remove the user from the waiting list, if present
-        await redisUtils.removeUserFromWaitingLists(client, socket.id);
 
         // If the user was in a room, handle additional cleanup
         if (oldRoomName) {
