@@ -68,11 +68,19 @@ function registerSocketEvents(io, socket, client) {
 
     // Handle ICE candidates
     socket.on("ice-candidate", async (candidate, roomName) => {
-        const roomData = JSON.parse(await client.get(roomName));
-        const targetSocketId = socket.id === roomData.offerer.socketId ? roomData.answerer.socketId : roomData.offerer.socketId;
-        roomData[socket.id === roomData.offerer.socketId ? "offerIceCandidates" : "answerIceCandidates"].push(candidate);
-        await client.set(roomName, JSON.stringify(roomData));
-        socket.to(targetSocketId).emit("ice-candidate", candidate);
+        try {
+            const roomData = JSON.parse(await client.get(roomName));
+            if (!roomData || !roomData.offerer || !roomData.answerer) {
+                console.error(`Room data is incomplete for room: ${roomName}`);
+                return; // Exit early if room data is incomplete
+            }
+            const targetSocketId = socket.id === roomData.offerer.socketId ? roomData.answerer.socketId : roomData.offerer.socketId;
+            roomData[socket.id === roomData.offerer.socketId ? "offerIceCandidates" : "answerIceCandidates"].push(candidate);
+            await client.set(roomName, JSON.stringify(roomData));
+            socket.to(targetSocketId).emit("ice-candidate", candidate);
+        } catch (error) {
+            console.error(`Error handling ice-candidate event: ${error}`);
+        }
     });
 
     // Offer and Answer handlers simplified with an example of the offer handler

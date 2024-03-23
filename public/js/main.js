@@ -116,18 +116,26 @@ function resetVideoCall() {
         peerConnection = null;
     }
     updateRemoteStream(null);
-    updateUIForCall('User', 'Gapen');
+    updateUIForCall('', null);
 }
 
 // mic toggle
 const changeText = document.querySelector("#mute");
 
 changeText.addEventListener("click", function () {
-  if (changeText.textContent === "mic_off") {
-    changeText.textContent = "mic";
-} else {
-    changeText.textContent = "mic_off";
-  }
+    const remoteStream = document.getElementById("remoteStream");
+    const audioTracks = remoteStream.srcObject.getAudioTracks();
+    if (!audioTracks) return;
+    const audioTrack = audioTracks[0];
+    if (!audioTrack) return;
+
+    if (changeText.textContent === "mic_off") {
+        changeText.textContent = "mic";
+        audioTrack.enabled = true; // Enable the audio track
+    } else {
+        changeText.textContent = "mic_off";
+        audioTrack.enabled = false; // Disable the audio track
+    }
 });
 
 initializeChat();
