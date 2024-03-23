@@ -85,8 +85,8 @@ body {
 .left-content h1 {
   font-size: 34px;
   color: #002252;
-  margin-top: 10vh;
-  margin-bottom: 10vh;
+  margin-top: 8vh;
+  margin-bottom: 7vh;
 }
 
 .left-content h2 {
@@ -94,8 +94,7 @@ body {
   align-items: center;
   color: #002252;
   font-size: 15px;
-  margin-top: 10vh;
-  margin-bottom: 6vh;
+  margin-bottom: 2vh;
 }
 
 .btn-home {
@@ -283,4 +282,23 @@ body {
 .checkbox-wrapper-26 input[type="checkbox"]:checked + label .tick_mark:after {
  transform: translate(0);
  opacity: 1;
+}
+
+/* Use a media query to add a breakpoint at 800px: */
+@media screen and (max-width: 768px) {
+  .right-content{
+    display: none;
+  }
+
+  .left-content{
+    width: 100%;
+  }
+
+  .btn-nav{
+    margin-right:2vh;
+  }
+  
+  .logo{
+    margin-left: 2vh;
+  }
 }
