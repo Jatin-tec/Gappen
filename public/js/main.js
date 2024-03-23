@@ -8,8 +8,9 @@ var roomName = null;
 async function initializeChat() {
     try {
         localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-        document.getElementById('localStream').srcObject = localStream;
-
+        const localVideo = document.getElementById('localStream')
+        localVideo.srcObject = localStream;
+        localVideo.style.transform = 'scaleX(-1)';
         const username = document.getElementById('localUsername').getAttribute('data-username');
         socket.emit('join', username);
     } catch (error) {
@@ -124,6 +125,7 @@ const changeText = document.querySelector("#mute");
 
 changeText.addEventListener("click", function () {
     const remoteStream = document.getElementById("remoteStream");
+    if (!remoteStream) return;
     const audioTracks = remoteStream.srcObject.getAudioTracks();
     if (!audioTracks) return;
     const audioTrack = audioTracks[0];
