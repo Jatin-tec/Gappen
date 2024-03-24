@@ -41,7 +41,6 @@ const redisUtils = {
                 user2Socket.emit("create-peer", user1Data.userName, roomName);
                 user1Socket.emit("create-offer", user2Data.userName, roomName);
             }
-
             console.log(`Matched users ${user1Data.socketId} and ${user2Data.socketId} in room ${roomName}`);
         }
     },
@@ -172,11 +171,9 @@ function registerSocketEvents(io, socket, client) {
                     redisUtils.matchUsersFromQueue(client, io, queueNameForOtherUser);
                 }
             }
-
             // Clean up room and user entries in Redis
             await client.del(oldRoomName);
         }
-
         // Removing the disconnecting user's Redis entry
         await client.del(socket.id);
     });

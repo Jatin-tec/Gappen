@@ -60,6 +60,17 @@ function userResponse() {
     }
 }
 
+//press enter on keyboard and send message
+addEventListener("keypress", (e) => {
+    if (e.keyCode === 13) {
+
+        const e = document.getElementById("textInput");
+        if (e === document.activeElement) {
+            userResponse();
+        }
+    }
+});
+
 socket.on("receive-message", (response) => {
     const objDiv = document.getElementById("chat-body");
     objDiv.innerHTML += `<div class="chat-receive">
@@ -147,12 +158,12 @@ initializeChat();
 (function (s, e, n, d, er) {
     s['Sender'] = er;
     s[er] = s[er] || function () {
-      (s[er].q = s[er].q || []).push(arguments)
+        (s[er].q = s[er].q || []).push(arguments)
     }, s[er].l = 1 * new Date();
     var a = e.createElement(n),
         m = e.getElementsByTagName(n)[0];
     a.async = 1;
     a.src = d;
     m.parentNode.insertBefore(a, m)
-  })(window, document, 'script', 'https://cdn.sender.net/accounts_resources/universal.js', 'sender');
-  sender('4a9060c8bd8246')
+})(window, document, 'script', 'https://cdn.sender.net/accounts_resources/universal.js', 'sender');
+sender('4a9060c8bd8246')
