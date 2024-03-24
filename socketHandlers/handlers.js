@@ -179,12 +179,11 @@ function registerSocketEvents(io, socket, client) {
     });
 }
 
-async function handleSessionDescription(description, roomName, type, client, socket, ackFunction = null) {
+async function handleSessionDescription(description, roomName, type, client, socket) {
     let room = JSON.parse(await client.get(roomName));
     room[type] = description;
     await client.set(roomName, JSON.stringify(room));
     const targetSocketId = type === 'offer' ? room.answerer.socketId : room.offerer.socketId;
-    if (ackFunction) ackFunction(room[`${type}IceCandidates`]);
     socket.to(targetSocketId).emit(type, description, roomName);
 }
 
