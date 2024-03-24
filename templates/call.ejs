@@ -80,7 +80,40 @@
         </div>
       </div>
     </div>
+
   </div>
+  <div class="smartcontain">
+    
+  
+  <div class="chat-smartphone">
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <h2>Chat</h2>
+        <div class="live-pulse"></div>
+      </div>
+      <button class="btn-report">
+        <span class="material-symbols-outlined">
+          report
+        </span>
+        Report!
+      </button>
+    </div>
+
+    <div class="chat-body" id="chat-body">
+    </div>
+
+    <div class="chat-bottom">
+      <button class="btn-next" id="skipButton">Next</button>
+
+      <div class="chat-msg-container">
+        <input type="text" class="input-field" name="message" id="textInput" placeholder="Type a message...">
+        <button class="btn-send" onclick="userResponse()">
+          Send <span class="material-symbols-outlined">send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/static/js/main.js"></script>

@@ -202,6 +202,9 @@ body {
   color: #fff;
   margin-left: 10px;
 }
+.chat-smartphone{
+  display: none;
+}
 
 .chat-header {
   display: flex;
@@ -347,4 +350,69 @@ body {
 }
 @keyframes l4 {
     to{width:25px;aspect-ratio: 1}
+}
+
+
+@media only screen and (max-width: 800px) {
+  body {
+    background-color: rgb(12, 13, 14);
+  }
+  .navbar {
+    display: flex;
+    background-color: white;
+    width: 100vh;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+  }
+  .chat {
+    display: none;
+  }
+  .vid-chat {
+    display: flex;
+    height: 60vh;
+    width: 100vh;
+  }
+  .smartcontain{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vh;
+  }
+  .chat-smartphone{
+    display: flex;
+    grid-area: chat-smartphone;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #ffffff;
+    align-content: center;
+    width: 100%;
+    height: 50vh;
+    padding: 10px;
+    border-radius: 10px;
+    color: #fff;
+    margin: 10%;
+  }
+  
+
+.chat-header {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #002252;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.chat-header-left{
+  display: flex;
+  align-items: center;
+}
+
+.chat-header h2 {
+  font-size: 24px;
+  color: #002252;
+  margin-right: 10px;
+}
 }
