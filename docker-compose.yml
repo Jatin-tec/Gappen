@@ -9,5 +9,16 @@ services:
       - redis-data:/data
     command: redis-server --appendonly yes
 
+  mongodb:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: rootuser
+      MONGO_INITDB_ROOT_PASSWORD: rootpass
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
 volumes:
   redis-data:
+  mongo-data:

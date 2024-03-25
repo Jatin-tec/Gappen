@@ -4,6 +4,7 @@ const http = require('http');
 const path = require('path');
 const logger = require('morgan');
 const socketIO = require('socket.io');
+const mongoose = require('mongoose');
 const app = express();
 
 const server = http.createServer(app);
@@ -14,6 +15,10 @@ const io = socketIO(server);
 const homeRouter = require('./routes/home')
 const callRouter = require('./routes/call')
 const apiRouter = require('./routes/api')
+
+// Import middleware
+const cookieParser = require('cookie-parser');
+const { checkBlocked } = require('./middleware/validateRequest');
 
 // Import socket event handlers
 const { registerSocketEvents } = require('./socketHandlers/handlers');
@@ -35,11 +40,16 @@ client.on('error', function (err) {
   console.log('Redis error: ' + err);
 });
 
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('Could not connect to MongoDB...', err));
+
 app.use(logger('dev'));
+app.use(cookieParser());
+app.use(checkBlocked);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname + '/templates'));
-app.use('/static', express.static(path.join(__dirname, 'public')))
-
+app.use('/static', express.static(path.join(__dirname, 'public')));
 
 app.use('/', homeRouter);
 app.use('/room', callRouter);
