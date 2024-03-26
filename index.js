@@ -40,7 +40,7 @@ client.on('error', function (err) {
   console.log('Redis error: ' + err);
 });
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO_URI || "mongodb://rootuser:rootpass@localhost:27017/?authSource=admin")
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('Could not connect to MongoDB...', err));
 

@@ -36,7 +36,7 @@ async function createPeerConnection(roomId) {
 
 function updateRemoteStream(stream) {
     if (stream) {
-        document.getElementById('loader').style.display = 'none';
+        // document.getElementById('loader').style.display = 'none';
     }
     document.getElementById('remoteStream').srcObject = stream;
 }
