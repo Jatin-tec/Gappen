@@ -2,8 +2,8 @@ const waitingUsersA = 'waitingUsersA';
 const waitingUsersB = 'waitingUsersB';
 
 const redisUtils = {
-    async addUserToQueue(client, queueName, userName, socketId) {
-        const userData = JSON.stringify({ userName, socketId });
+    async addUserToQueue(client, queueName, userName, socketId, switched = false) {
+        const userData = JSON.stringify({ userName, socketId, joinedAt: Date.now(), switched });
         await client.sAdd(queueName, userData);
         const waitingUsersCount = await client.sCard(queueName);
         console.log(`User ${socketId} added to ${queueName}. Waiting users: ${waitingUsersCount}`);
@@ -66,6 +66,7 @@ function registerSocketEvents(io, socket, client) {
     socket.on("join", userName => {
         const queueName = Math.random() < 0.5 ? waitingUsersA : waitingUsersB;
         redisUtils.addUserToQueue(client, queueName, userName, socket.id);
+        socket.emit("waiting", queueName);
         redisUtils.matchUsersFromQueue(client, io, queueName);
     });
 
@@ -187,4 +188,46 @@ async function handleSessionDescription(description, roomName, type, client, soc
     socket.to(targetSocketId).emit(type, description, roomName);
 }
 
-module.exports = { registerSocketEvents };
+async function processWaitingQueues(client, io) {
+    const checkInterval = 10000; // Check every 10 seconds
+    const maxWaitTime = 30000; // 30 seconds wait time
+    const queues = [waitingUsersA, waitingUsersB];
+
+    setInterval(async () => {
+        const currentTime = Date.now();
+        for (const queueName of queues) {
+            const members = await client.sMembers(queueName);
+            for (const memberStr of members) {
+                const member = JSON.parse(memberStr);
+                if (currentTime - member.joinedAt > maxWaitTime) {
+                    if (!member.switched) {
+                        // Switch the user's queue if they haven't been switched yet
+                        const oppositeQueueName = queueName === waitingUsersA ? waitingUsersB : waitingUsersA;
+                        await client.sRem(queueName, memberStr);
+                        member.joinedAt = currentTime; // Reset the joinedAt to current time for the new queue
+                        member.switched = true; // Mark the user as switched
+                        const newMemberStr = JSON.stringify(member);
+                        await client.sAdd(oppositeQueueName, newMemberStr);
+
+                        const socket = io.sockets.sockets.get(member.socketId);
+                        if (socket) {
+                            socket.emit("switchedQueue", oppositeQueueName); // Notify user they've been switched to a different queue
+                            console.log(`Switched user ${member.socketId} from ${queueName} to ${oppositeQueueName}`);
+                            // Try to match users again after switching queues
+                            await redisUtils.matchUsersFromQueue(client, io, oppositeQueueName);
+                        }
+                    } else {
+                        // If the user has already been switched once and still not matched, emit an event
+                        const socket = io.sockets.sockets.get(member.socketId);
+                        if (socket) {
+                            socket.emit("matchNotFound");
+                            console.log(`No match found for user ${member.socketId} after switching queues.`);
+                        }
+                    }
+                }
+            }
+        }
+    }, checkInterval);
+}
+
+module.exports = { registerSocketEvents, processWaitingQueues };

@@ -36,7 +36,7 @@ async function createPeerConnection(roomId) {
 
 function updateRemoteStream(stream) {
     if (stream) {
-        // document.getElementById('loader').style.display = 'none';
+        document.getElementById('loader').style.display = 'none';
     }
     document.getElementById('remoteStream').srcObject = stream;
 }
@@ -80,8 +80,18 @@ socket.on("receive-message", (response) => {
 
 
 // Socket event listeners
+socket.on('waiting', queueName => {
+    document.getElementById('remoteUsername').innerText = "Looking for partner...";
+    // document.getElementById('loader').style.display = 'block';
+});
+
+socket.on('matchNotFound', () => {
+    document.getElementById('remoteUsername').innerText = "It seems no ones online, try again later!";
+    document.getElementById('loader').style.display = 'none';
+});
+
 socket.on('create-offer', async (remoteUsername, roomId) => {
-    console.log('Create offer');
+    document.getElementById('remoteUsername').innerText = "Found a match!";
     updateUIForCall(remoteUsername, roomId);
     await createPeerConnection(roomId);
     const offer = await peerConnection.createOffer();
@@ -90,7 +100,7 @@ socket.on('create-offer', async (remoteUsername, roomId) => {
 });
 
 socket.on('create-peer', async (remoteUsername, roomId) => {
-    console.log('Create peer');
+    document.getElementById('remoteUsername').innerText = "Found a match!";
     updateUIForCall(remoteUsername, roomId);
     await createPeerConnection(roomId);
 });

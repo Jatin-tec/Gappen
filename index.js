@@ -21,7 +21,7 @@ const cookieParser = require('cookie-parser');
 const { checkBlocked } = require('./middleware/validateRequest');
 
 // Import socket event handlers
-const { registerSocketEvents } = require('./socketHandlers/handlers');
+const { registerSocketEvents, processWaitingQueues } = require('./socketHandlers/handlers');
 
 const PORT = process.env.PORT || 3000;
 const REDIS_URL = process.env.REDIS_URL || 'redis://localhost:6379';
@@ -34,6 +34,7 @@ client.connect();
 
 client.on('connect', function () {
   console.log('Connected to Redis');
+  processWaitingQueues(client, io);
 });
 
 client.on('error', function (err) {
@@ -62,4 +63,5 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, () => {
   console.log(`Server ready on port ${PORT}`);
+
 });
