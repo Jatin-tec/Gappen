@@ -66,7 +66,7 @@ function registerSocketEvents(io, socket, client) {
     socket.on("join", userName => {
         const queueName = Math.random() < 0.5 ? waitingUsersA : waitingUsersB;
         redisUtils.addUserToQueue(client, queueName, userName, socket.id);
-        socket.emit("waiting", queueName);
+        io.to(socket.id).emit("waiting");
         redisUtils.matchUsersFromQueue(client, io, queueName);
     });
 
@@ -101,6 +101,7 @@ function registerSocketEvents(io, socket, client) {
 
     socket.on("skip", async () => {
         const userObj = JSON.parse(await client.get(socket.id));
+        console.log(`User ${socket.id} skipped`);
         if (!userObj) return; // Early return if user data is not found
 
         const oldRoomName = userObj.roomName;
@@ -108,21 +109,23 @@ function registerSocketEvents(io, socket, client) {
 
         if (oldRoomName) {
             socket.leave(oldRoomName);
-            io.to(oldRoomName).emit("userSkipped", socket.id); // Notify the other user in the room
 
             // Clean up Redis entries for the room and the skipping user
             await client.del(socket.id);
             await client.del(oldRoomName);
 
             // Extract the ID of the other user in the room
-            const otherSocketId = oldRoomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '');
+            const otherSocketId = oldRoomName.replace(`room-${socket.id}-`, '').replace(`-${socket.id}`, '').replace(`room-`, '');
+            io.to(oldRoomName).emit("userSkipped", socket.id); // Notify the other user in the room
             const otherSocket = io.sockets.sockets.get(otherSocketId);
 
             // Re-add both users to waiting lists for a new match
             const queueNameForCurrentUser = Math.random() < 0.5 ? waitingUsersA : waitingUsersB;
             redisUtils.addUserToQueue(client, queueNameForCurrentUser, userObj.userName, socket.id);
+            io.to(socket.id).emit("waiting");
             redisUtils.matchUsersFromQueue(client, io, queueNameForCurrentUser);
-
+            
+            console.log(`Other socket ID: ${otherSocketId}`)
             if (otherSocket) {
                 // Handle the other user similarly: clean up and re-queue for matching
                 const otherUserObj = JSON.parse(await client.get(otherSocketId));
@@ -131,6 +134,7 @@ function registerSocketEvents(io, socket, client) {
                 const queueNameForOtherUser = queueNameForCurrentUser === waitingUsersA ? waitingUsersB : waitingUsersA;
                 if (otherUserObj && otherUserObj.userName) {
                     redisUtils.addUserToQueue(client, queueNameForOtherUser, otherUserObj.userName, otherSocketId);
+                    io.to(otherSocketId).emit("waiting");
                     redisUtils.matchUsersFromQueue(client, io, queueNameForOtherUser);
                 }
             }
@@ -169,6 +173,7 @@ function registerSocketEvents(io, socket, client) {
                     const otherUserObj = JSON.parse(otherUserObjStr);
                     const queueNameForOtherUser = Math.random() < 0.5 ? 'waitingUsersA' : 'waitingUsersB';
                     redisUtils.addUserToQueue(client, queueNameForOtherUser, otherUserObj.userName, otherSocketId);
+                    io.to(otherSocketId).emit("waiting");
                     redisUtils.matchUsersFromQueue(client, io, queueNameForOtherUser);
                 }
             }

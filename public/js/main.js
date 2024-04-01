@@ -4,6 +4,7 @@ const socket = io();
 var localStream = null;
 var peerConnection = null;
 var roomName = null;
+var remoteUsername = null;
 
 async function initializeChat() {
     try {
@@ -35,6 +36,7 @@ async function createPeerConnection(roomId) {
 }
 
 function updateRemoteStream(stream) {
+    document.getElementById('loader').style.display = 'block';
     if (stream) {
         document.getElementById('loader').style.display = 'none';
     }
@@ -80,7 +82,7 @@ socket.on("receive-message", (response) => {
 
 
 // Socket event listeners
-socket.on('waiting', queueName => {
+socket.on('waiting', () => {
     document.getElementById('remoteUsername').innerText = "Looking for partner...";
     // document.getElementById('loader').style.display = 'block';
 });
@@ -91,7 +93,6 @@ socket.on('matchNotFound', () => {
 });
 
 socket.on('create-offer', async (remoteUsername, roomId) => {
-    document.getElementById('remoteUsername').innerText = "Found a match!";
     updateUIForCall(remoteUsername, roomId);
     await createPeerConnection(roomId);
     const offer = await peerConnection.createOffer();
@@ -100,7 +101,6 @@ socket.on('create-offer', async (remoteUsername, roomId) => {
 });
 
 socket.on('create-peer', async (remoteUsername, roomId) => {
-    document.getElementById('remoteUsername').innerText = "Found a match!";
     updateUIForCall(remoteUsername, roomId);
     await createPeerConnection(roomId);
 });
@@ -133,12 +133,16 @@ document.getElementById("skipButton").addEventListener("click", () => {
 });
 
 function resetVideoCall() {
+    document.getElementById('loader').style.display = 'block';
+    const objDiv = document.getElementById("chat-body");
+    objDiv.innerHTML = "";
+
     if (peerConnection) {
         peerConnection.close();
         peerConnection = null;
     }
     updateRemoteStream(null);
-    updateUIForCall('', null);
+    updateUIForCall('Looking for partner...', null);
 }
 
 // mic toggle
