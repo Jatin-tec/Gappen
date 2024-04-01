@@ -46,6 +46,7 @@ mongoose.connect(process.env.MONGO_URI || "mongodb://rootuser:rootpass@localhost
   .catch(err => console.error('Could not connect to MongoDB...', err));
 
 app.use(logger('dev'));
+app.use(express.json());
 app.use(cookieParser());
 app.use(checkBlocked);
 app.set('view engine', 'ejs');

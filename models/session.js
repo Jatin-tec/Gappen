@@ -6,6 +6,10 @@ const sessionSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
+    location: {
+        type: { type: String, enum: ['Point'], required: false },
+        coordinates: { type: [Number], required: false } // [longitude, latitude]
+    },
     fingerPrint: {
         type: String,
         required: false,
@@ -31,6 +35,9 @@ const sessionSchema = new mongoose.Schema({
         default: Date.now,
     },
 });
+
+sessionSchema.index({ location: '2dsphere' });
+sessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 const Session = mongoose.model('Session', sessionSchema);
 module.exports = Session

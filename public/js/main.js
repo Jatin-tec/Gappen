@@ -15,7 +15,7 @@ async function initializeChat() {
         const username = document.getElementById('localUsername').getAttribute('data-username');
         socket.emit('join', username);
     } catch (error) {
-        console.error('Error getting user media:', error);
+        alert('Error getting media');
     }
 }
 

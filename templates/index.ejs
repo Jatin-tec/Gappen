@@ -12,13 +12,18 @@
     />
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LW2P3VQLC6"></script>
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-LW2P3VQLC6"
+    ></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-      gtag('config', 'G-LW2P3VQLC6');
+      gtag("config", "G-LW2P3VQLC6");
     </script>
   </head>
   <body>
@@ -45,10 +50,19 @@
             value="<%=randomName%>"
           />
           <div class="waitlist">
-            <div class="checkbox-wrapper-26" >
-              <input type="checkbox" id="_checkbox-26" data-tally-open="wd6g5D" data-tally-layout="modal" data-tally-hide-title="1" data-tally-emoji-text="👋" data-tally-emoji-animation="wave" data-tally-auto-close="0">
+            <div class="checkbox-wrapper-26">
+              <input
+                type="checkbox"
+                id="_checkbox-26"
+                data-tally-open="wd6g5D"
+                data-tally-layout="modal"
+                data-tally-hide-title="1"
+                data-tally-emoji-text="👋"
+                data-tally-emoji-animation="wave"
+                data-tally-auto-close="0"
+              />
               <label for="_checkbox-26">
-                <div class="tick_mark" ></div>
+                <div class="tick_mark"></div>
               </label>
             </div>
             <div>
@@ -90,7 +104,149 @@
     </div>
   </body>
   <script src="/static/js/fingerprint.js"></script>
+  <script src="/static/js/location.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <script async src="https://tally.so/widgets/embed.js"></script>
   <script>
+    function join() {
+      const userName = document.getElementById("userName").value;
+      window.location = `/room?userName=${encodeURIComponent(userName)}`;
+    }
+  </script>
+  <script>
+    async function getFingerprint() {
+      return new Promise(async (resolve, reject) => {
+        try {
+          const fingerprintData = {
+            userAgent: navigator.userAgent,
+            language: navigator.language,
+            platform: navigator.platform,
+            screen: {
+              width: screen.width,
+              height: screen.height,
+              colorDepth: screen.colorDepth,
+            },
+            timezoneOffset: new Date().getTimezoneOffset(),
+            sessionStorage: !!window.sessionStorage,
+            localStorage: !!window.localStorage,
+            indexedDB: !!window.indexedDB,
+            cookiesEnabled: navigator.cookieEnabled,
+            canvasFingerprint: await getCanvasFingerprint(),
+            webGLFingerprint: getWebGLFingerprint(),
+            audioFingerprint: await getAudioFingerprint(),
+            fonts: await getFonts(),
+          };
+          const fingerprint = JSON.stringify(fingerprintData);
+          resolve(fingerprint);
+        } catch (error) {
+          reject(error);
+        }
+      });
+    }
+    function getCanvasFingerprint() {
+      return new Promise((resolve) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.textBaseline = "top";
+        ctx.font = "14px Arial";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "#f60";
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = "#069";
+        ctx.fillText("Hello, world!", 2, 15);
+        ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+        ctx.fillText("Hello, world!", 4, 17);
+
+        resolve(canvas.toDataURL());
+      });
+    }
+    function getWebGLFingerprint() {
+      const canvas = document.createElement("canvas");
+      const gl =
+        canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+      const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+      return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+    }
+    async function getAudioFingerprint() {
+      const context = new (window.OfflineAudioContext ||
+        window.webkitOfflineAudioContext)(1, 44100, 44100);
+      const oscillator = context.createOscillator();
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(10000, context.currentTime);
+
+      const compressor = context.createDynamicsCompressor();
+      for (let field in compressor) {
+        if (
+          typeof compressor[field] === "number" ||
+          typeof compressor[field] === "boolean"
+        ) {
+          try {
+            compressor[field].setValueAtTime(
+              compressor[field],
+              context.currentTime
+            );
+          } catch (e) {}
+        }
+      }
+
+      oscillator.connect(compressor);
+      compressor.connect(context.destination);
+      oscillator.start(0);
+
+      // Only call startRendering once, and wait for it to complete.
+      const buffer = await context.startRendering();
+      const data = buffer.getChannelData(0);
+      let fingerprint = 0;
+      for (let i = 0; i < data.length; ++i) {
+        fingerprint += data[i];
+      }
+      return fingerprint;
+    }
+    async function getFonts() {
+      // Use CSS Font Loading API, fallback to other methods if necessary
+      const fontList = [
+        "Arial",
+        "Verdana",
+        "Helvetica",
+        "Times New Roman",
+        "Courier New",
+        "Comic Sans MS",
+        "Impact",
+      ];
+      const testString = "mmmmmmmmmmlli";
+      const testSize = "72px";
+      const h = document.getElementsByTagName("body")[0];
+      const baseFonts = ["monospace", "sans-serif", "serif"];
+      const widths = {};
+      const results = {};
+
+      baseFonts.forEach((baseFont) => {
+        const s = document.createElement("span");
+        s.style.fontSize = testSize;
+        s.innerHTML = testString;
+        s.style.fontFamily = baseFont;
+        h.appendChild(s);
+        widths[baseFont] = s.offsetWidth;
+        h.removeChild(s);
+      });
+
+      for (let i = 0; i < fontList.length; i++) {
+        const font = fontList[i];
+        results[font] = false;
+        for (let j = 0; j < baseFonts.length; j++) {
+          const s = document.createElement("span");
+          s.style.fontSize = testSize;
+          s.innerHTML = testString;
+          s.style.fontFamily = font + "," + baseFonts[j]; // Try font first, then fallback.
+          h.appendChild(s);
+          if (s.offsetWidth !== widths[baseFonts[j]]) {
+            results[font] = true; // The width is different, font is active.
+          }
+          h.removeChild(s);
+        }
+      }
+      return results; // Returns an object with fonts as keys and boolean values indicating presence.
+    }
     getFingerprint()
       .then(async (fingerprint) => {
         hash = await hashFingerprint(fingerprint);
@@ -105,13 +261,5 @@
       .catch((error) => {
         console.error("Error generating fingerprint:", error);
       });
-  </script>
-  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-  <script async src="https://tally.so/widgets/embed.js"></script>
-  <script>
-    function join() {
-      const userName = document.getElementById("userName").value;
-      window.location = `/room?userName=${encodeURIComponent(userName)}`;
-    }
   </script>
 </html>
