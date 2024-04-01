@@ -25,7 +25,7 @@
     <img src="static/img/logo.png" class="logo">
     <!-- <button class="btn-nav">Gender</button> -->
     <div class="nav-right">
-      <button class="btn-nav" onclick="window.location.href='https://gappen.onrender.com';">
+      <button class="btn-nav" href="https://gappen.onrender.com">
         <span class="material-symbols-outlined">
           home
         </span>
@@ -44,13 +44,17 @@
       <video class="video-player" id="remoteStream" autoplay playsinline></video>
       <div class="overlay">
         <p id="remoteUsername">Connecting...</p>
+        <!-- <p>Searching users</p>
+        <p>Found a match!</p>
+        <p>Taking longer time than usual</p>
+        <p>It seems no user online,<br> try again later!</p> -->
         <button class="btn-report-m">
           <span class="material-symbols-outlined">
             report
           </span>
           Report
         </button>
-        <!-- <div class="loader"></div>  -->
+        <div class="loader"></div> 
         
         <span class="material-symbols-outlined">
           <p class="mute" id="mute">mic</p>
@@ -94,11 +98,27 @@
           </button>
         </div>
       </div>
+      <p class="feedback">Give us your&nbsp; <a href="#tally-open=mZNg55&tally-layout=modal&tally-auto-close=0">feedback</a>&nbsp;🤩 </p>
     </div>
   </div>
 </body>
 <script src="/socket.io/socket.io.js"></script>
 <script src="/static/js/main.js"></script>
+<script async src="https://tally.so/widgets/embed.js"></script>
 
+<script>
+window.TallyConfig = {
+  "formId": "mZNg55",
+  "popup": {
+    "open": {
+      "trigger": "exit"
+    },
+    "layout": "modal",
+    "autoClose": 0,
+    "showOnce": true,
+    "doNotShowAfterSubmit": true
+  }
+};
+</script>
 </html>
 

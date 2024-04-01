@@ -121,9 +121,13 @@ body {
 }
 
 .video-player {
-  width: 100%;
   border-radius: 10px;
-  max-height: 40vh;
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  z-index: -100;
+  object-fit: cover;
+  overflow: hidden;
 }
 
 .chat {
@@ -265,15 +269,33 @@ body {
   margin-right: 10px;
 }
 
+.feedback{
+  text-align: center;
+  color: #002252;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  font-size: 11px;
+  margin-top: 3px;
+}
+
+.feedback a{
+  color: #ff3131
+}
 .loader {
   width: 60px;
   aspect-ratio: 4;
-  margin: 8rem auto;
   --c: #ff3131 90%, #0000;
   background: radial-gradient(circle closest-side at left 6px top 50%, var(--c)), radial-gradient(circle closest-side, var(--c)), radial-gradient(circle closest-side at right 6px top 50%, var(--c));
   background-size: 100% 100%;
   background-repeat: no-repeat;
   animation: l4 1s infinite alternate;
+  margin:auto;
+  left:0;
+  right:0;
+  top:0;
+  bottom:0;
+  position:absolute;
 }
 
 @keyframes l4 {
@@ -289,6 +311,10 @@ body {
 /* Media Query for Responsive Design */
 
 @media screen and (max-width: 800px) {
+  .navbar{
+    display: none;
+  }
+
   .btn-nav {
     margin-right: 2vh;
   }
@@ -311,7 +337,7 @@ body {
     margin-left: 0;
     margin-right: 0;
     
-    min-height: 90vh;
+    min-height: 110vh;
     position: relative;
     z-index: 0;
     opacity:var()
@@ -360,13 +386,10 @@ body {
     right: 0;
   }
 
-  .video-player {
-  max-height: 30vh;
-  }
   
-    .chat-header{
-      display: none;
-    }
+  .chat-header{
+    display: none;
+  }
 
   .btn-nav {
     display: none;
@@ -374,4 +397,5 @@ body {
 
   #localUsername {
     display:none;
+}
 }
