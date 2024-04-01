@@ -182,6 +182,10 @@ function registerSocketEvents(io, socket, client) {
 
 async function handleSessionDescription(description, roomName, type, client, socket) {
     let room = JSON.parse(await client.get(roomName));
+    if (!room) {
+        console.error(`Room data not found for room: ${roomName}`);
+        return;
+    }
     room[type] = description;
     await client.set(roomName, JSON.stringify(room));
     const targetSocketId = type === 'offer' ? room.answerer.socketId : room.offerer.socketId;
